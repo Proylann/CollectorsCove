@@ -1,1 +1,3 @@
-# summer project 2026
+# Collectors Cove
+
+An Android app for exploring, collecting, and managing collectible items.
