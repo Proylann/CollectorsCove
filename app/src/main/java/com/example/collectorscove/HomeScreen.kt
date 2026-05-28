@@ -1,55 +1,83 @@
 package com.example.collectorscove
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen() {
-    Scaffold(
-        bottomBar = { BottomNavBar() },
-        containerColor = Color.White
-    ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
-        ) {
-            item { Spacer(modifier = Modifier.height(28.dp)) }
-            item { TopBar() }
-            item { CollectorHighlight() }
-            item { ProductSection(title = "Shoes", items = shoeItems) }
-            item { ProductSection(title = "Cards", items = cardItems) }
-            item { Spacer(modifier = Modifier.height(20.dp)) }
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+
+    AppMenuDrawer(drawerState = drawerState) {
+        Scaffold(
+            bottomBar = { BottomNavBar() },
+            containerColor = Color.White
+        ) { padding ->
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(horizontal = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                item { Spacer(modifier = Modifier.height(28.dp)) }
+                item { TopBar(onMenuClick = { scope.launch { drawerState.open() } }) }
+                item { CollectorHighlight() }
+                item { ProductSection(title = "Shoes", items = shoeItems) }
+                item { ProductSection(title = "Cards", items = cardItems) }
+                item { Spacer(modifier = Modifier.height(20.dp)) }
+            }
         }
     }
 }
 
 @Composable
-private fun TopBar() {
+private fun TopBar(onMenuClick: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text("☰", fontSize = 32.sp)
+        Text(
+            text = "☰",
+            modifier = Modifier.clickable(onClick = onMenuClick),
+            fontSize = 32.sp,
+            color = Color.Black
+        )
 
         Spacer(modifier = Modifier.weight(1f))
 
@@ -62,9 +90,9 @@ private fun TopBar() {
 
         Spacer(modifier = Modifier.weight(1f))
 
-        Text("⌕", fontSize = 30.sp)
+        Text("Search", fontSize = 11.sp, color = Color.Black)
         Spacer(modifier = Modifier.width(20.dp))
-        Text("♧", fontSize = 24.sp)
+        Text("Bell", fontSize = 11.sp, color = Color.Black)
     }
 }
 
@@ -87,14 +115,6 @@ private fun CollectorHighlight() {
                 .clip(RoundedCornerShape(8.dp)),
             contentAlignment = Alignment.Center
         ) {
-            // Replace this with your real image once added to res/drawable:
-            // Image(
-            //     painter = painterResource(id = R.drawable.air_max_97),
-            //     contentDescription = "Nike Air Max 97",
-            //     modifier = Modifier.fillMaxSize(),
-            //     contentScale = ContentScale.Fit
-            // )
-
             Text(
                 text = "Add Air Max image here",
                 color = Color.Gray,
@@ -111,7 +131,7 @@ private fun CollectorHighlight() {
         )
 
         Text(
-            text = "•••",
+            text = "...",
             modifier = Modifier.align(Alignment.CenterHorizontally),
             color = Color.LightGray,
             fontSize = 20.sp
@@ -120,17 +140,9 @@ private fun CollectorHighlight() {
 }
 
 @Composable
-private fun ProductSection(
-    title: String,
-    items: List<ProductItem>
-) {
+private fun ProductSection(title: String, items: List<ProductItem>) {
     Column {
-        Text(
-            text = title,
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold
-        )
-
+        Text(text = title, fontSize = 22.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(8.dp))
 
         Row(
@@ -138,20 +150,14 @@ private fun ProductSection(
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             items.forEach { item ->
-                ProductCard(
-                    item = item,
-                    modifier = Modifier.weight(1f)
-                )
+                ProductCard(item = item, modifier = Modifier.weight(1f))
             }
         }
     }
 }
 
 @Composable
-private fun ProductCard(
-    item: ProductItem,
-    modifier: Modifier = Modifier
-) {
+private fun ProductCard(item: ProductItem, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier.height(116.dp),
         shape = RoundedCornerShape(4.dp),
@@ -166,19 +172,7 @@ private fun ProductCard(
                     .background(Color(0xFFF6F6F6)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = item.placeholder,
-                    color = Color.Gray,
-                    fontSize = 11.sp
-                )
-
-                // After adding images to res/drawable, use this:
-                // Image(
-                //     painter = painterResource(id = item.imageRes),
-                //     contentDescription = item.name,
-                //     modifier = Modifier.fillMaxSize().padding(6.dp),
-                //     contentScale = ContentScale.Fit
-                // )
+                Text(text = item.placeholder, color = Color.Gray, fontSize = 11.sp)
             }
 
             Text(
@@ -205,11 +199,11 @@ private fun BottomNavBar() {
         containerColor = Color.White,
         tonalElevation = 0.dp
     ) {
-        BottomNavItem("⌂", "Home", true)
-        BottomNavItem("◉", "Explore", false)
-        BottomNavItem("▾", "Orders", false)
-        BottomNavItem("☏", "Chat", false)
-        BottomNavItem("♡", "Account", false)
+        BottomNavItem("Home", "Home", true)
+        BottomNavItem("Explore", "Explore", false)
+        BottomNavItem("Orders", "Orders", false)
+        BottomNavItem("Chat", "Chat", false)
+        BottomNavItem("Account", "Account", false)
     }
 }
 
@@ -225,17 +219,12 @@ private fun RowScope.BottomNavItem(
         icon = {
             Text(
                 text = icon,
-                fontSize = 24.sp,
+                fontSize = 11.sp,
+                fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
                 color = Color.Black
             )
         },
-        label = {
-            Text(
-                text = label,
-                fontSize = 9.sp,
-                color = Color.Black
-            )
-        },
+        alwaysShowLabel = false,
         colors = NavigationBarItemDefaults.colors(
             indicatorColor = Color.Transparent
         )
@@ -249,13 +238,13 @@ private data class ProductItem(
 )
 
 private val shoeItems = listOf(
-    ProductItem("Nike SB Dunk Low Hein...", "₱335,800.00", "shoe 1"),
-    ProductItem("7-Eleven x Nike SB Dunk...", "₱310,169.34", "shoe 2"),
-    ProductItem("Nike Dunk High Coraline", "₱333,900.65", "shoe 3")
+    ProductItem("Nike SB Dunk Low Hein...", "P335,800.00", "shoe 1"),
+    ProductItem("7-Eleven x Nike SB Dunk...", "P310,169.34", "shoe 2"),
+    ProductItem("Nike Dunk High Coraline", "P333,900.65", "shoe 3")
 )
 
 private val cardItems = listOf(
-    ProductItem("Charizard-Holo 2016...", "₱143,671.00", "card 1"),
-    ProductItem("Pokemon Fossil Rare...", "₱10,891.18", "card 2"),
-    ProductItem("Solgaleo-GX - 155/149...", "₱3,954.86", "card 3")
+    ProductItem("Charizard-Holo 2016...", "P143,671.00", "card 1"),
+    ProductItem("Pokemon Fossil Rare...", "P10,891.18", "card 2"),
+    ProductItem("Solgaleo-GX - 155/149...", "P3,954.86", "card 3")
 )

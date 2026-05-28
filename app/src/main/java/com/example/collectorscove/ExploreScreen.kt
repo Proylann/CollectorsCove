@@ -3,124 +3,151 @@ package com.example.collectorscove
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.text.font.FontWeight
+import kotlinx.coroutines.launch
+
+private val ExploreGold = Color(0xFFB8970A)
+private val ExploreLightGray = Color(0xFFF3F3F3)
+private val ExploreBorder = Color(0xFFD8D8D8)
 
 @Composable
 fun ExploreScreen() {
-    androidx.compose.material3.Scaffold(
-        bottomBar = { ExploreBottomNavBar() },
-        containerColor = Color.White
-    ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
-        ) {
-            item { Spacer(modifier = Modifier.height(28.dp)) }
-            item { ExploreTopBar() }
-            item { ExploreHeader() }
-            item { ExploreSectionTitle("Varieties") }
-            item { ImageGrid(varietyItems) }
-            item { ExploreSectionTitle("Metalware") }
-            item { MetalwareRow() }
-            item { Spacer(modifier = Modifier.height(40.dp)) }
-        }
-    }
-}
+    var query by remember { mutableStateOf("") }
+    var selectedCategory by remember { mutableStateOf("All") }
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
 
-@Composable
-private fun ExploreTopBar() {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text("☰", fontSize = 28.sp, color = Color.Black)
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        Box(
-            modifier = Modifier.width(92.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Box(
+    AppMenuDrawer(drawerState = drawerState) {
+        Scaffold(
+            bottomBar = { ExploreBottomNavBar() },
+            containerColor = Color.White
+        ) { padding ->
+            LazyColumn(
                 modifier = Modifier
-                    .size(28.dp)
-                    .align(Alignment.CenterStart)
-                    .background(Color(0xFFBFA619), shape = androidx.compose.foundation.shape.CircleShape)
-            )
-
-            Column(
-                modifier = Modifier.padding(start = 20.dp)
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Text(
-                    text = "Collectors",
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    lineHeight = 10.sp
-                )
-                Text(
-                    text = "Cove",
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    lineHeight = 10.sp
-                )
-                Text(
-                    text = "est. 2024",
-                    fontSize = 4.sp
-                )
+                item { Spacer(modifier = Modifier.height(24.dp)) }
+                item { ExploreTopBar(onMenuClick = { scope.launch { drawerState.open() } }) }
+                item {
+                    SearchBar(
+                        query = query,
+                        onQueryChange = { query = it }
+                    )
+                }
+                item {
+                    CategoryChips(
+                        selectedCategory = selectedCategory,
+                        onCategorySelected = { selectedCategory = it }
+                    )
+                }
+                item { SectionTitle("Recent Searches") }
+                item { RecentSearches() }
+                item { SectionTitle("Popular Results") }
+                item { PopularResultsGrid() }
+                item { Spacer(modifier = Modifier.height(24.dp)) }
             }
         }
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        Text("⌕", fontSize = 26.sp, color = Color.Black)
-        Spacer(modifier = Modifier.width(16.dp))
-        Text("♧", fontSize = 22.sp, color = Color.Black)
     }
 }
 
 @Composable
-private fun ExploreHeader() {
+private fun ExploreTopBar(onMenuClick: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "Explore",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
+            text = "☰",
+            modifier = Modifier.clickable(onClick = onMenuClick),
+            fontSize = 28.sp,
             color = Color.Black
         )
 
         Spacer(modifier = Modifier.weight(1f))
 
+        LogoMark()
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        Text("Bell", fontSize = 11.sp, color = Color.Black)
+    }
+}
+
+@Composable
+private fun LogoMark() {
+    Box(
+        modifier = Modifier.width(100.dp),
+        contentAlignment = Alignment.Center
+    ) {
         Box(
             modifier = Modifier
-                .width(82.dp)
-                .height(30.dp)
-                .border(1.dp, Color.Gray, RoundedCornerShape(4.dp)),
-            contentAlignment = Alignment.Center
+                .size(30.dp)
+                .align(Alignment.CenterStart)
+                .background(ExploreGold, CircleShape)
+        )
+
+        Column(
+            modifier = Modifier.padding(start = 22.dp)
         ) {
             Text(
-                text = "Discover  ⌄",
+                text = "Collectors",
                 fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                lineHeight = 10.sp,
+                color = Color.Black
+            )
+            Text(
+                text = "Cove",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                lineHeight = 10.sp,
+                color = Color.Black
+            )
+            Text(
+                text = "est. 2024",
+                fontSize = 4.sp,
                 color = Color.Black
             )
         }
@@ -128,30 +155,155 @@ private fun ExploreHeader() {
 }
 
 @Composable
-private fun ExploreSectionTitle(title: String) {
+private fun SearchBar(
+    query: String,
+    onQueryChange: (String) -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        OutlinedTextField(
+            value = query,
+            onValueChange = onQueryChange,
+            placeholder = {
+                Text(
+                    text = "Search collectibles",
+                    fontSize = 13.sp,
+                    color = Color.Gray
+                )
+            },
+            leadingIcon = {
+                Text("Search", fontSize = 10.sp, color = Color.Gray)
+            },
+            modifier = Modifier
+                .weight(1f)
+                .height(50.dp),
+            singleLine = true,
+            shape = RoundedCornerShape(8.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = ExploreGold,
+                unfocusedBorderColor = ExploreBorder,
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White,
+                cursorColor = Color.Black
+            )
+        )
+
+        Spacer(modifier = Modifier.width(10.dp))
+
+        Box(
+            modifier = Modifier
+                .size(50.dp)
+                .border(1.dp, ExploreBorder, RoundedCornerShape(8.dp))
+                .background(Color.White, RoundedCornerShape(8.dp)),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("Filter", fontSize = 11.sp, color = Color.Black)
+        }
+    }
+}
+
+@Composable
+private fun CategoryChips(
+    selectedCategory: String,
+    onCategorySelected: (String) -> Unit
+) {
+    val categories = listOf("All", "Shoes", "Cards", "Toys", "Antiques")
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        categories.forEach { category ->
+            val selected = category == selectedCategory
+
+            Box(
+                modifier = Modifier
+                    .height(32.dp)
+                    .background(
+                        color = if (selected) ExploreGold else ExploreLightGray,
+                        shape = RoundedCornerShape(16.dp)
+                    )
+                    .border(
+                        width = 1.dp,
+                        color = if (selected) ExploreGold else ExploreBorder,
+                        shape = RoundedCornerShape(16.dp)
+                    )
+                    .clickable { onCategorySelected(category) }
+                    .padding(horizontal = 12.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = category,
+                    fontSize = 12.sp,
+                    color = if (selected) Color.White else Color.Black
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SectionTitle(title: String) {
     Text(
         text = title,
-        fontSize = 13.sp,
+        fontSize = 18.sp,
         fontWeight = FontWeight.Bold,
         color = Color.Black
     )
 }
 
 @Composable
-private fun ImageGrid(items: List<String>) {
+private fun RecentSearches() {
     Column(
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items.chunked(3).forEach { rowItems ->
+        listOf("Nike Air Max", "Charizard", "Vintage radio").forEach { search ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(36.dp)
+                    .background(ExploreLightGray, RoundedCornerShape(6.dp))
+                    .padding(horizontal = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = search,
+                    modifier = Modifier.weight(1f),
+                    fontSize = 13.sp,
+                    color = Color.Black
+                )
+
+                Text(
+                    text = "x",
+                    fontSize = 13.sp,
+                    color = Color.Gray
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun PopularResultsGrid() {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        popularItems.chunked(2).forEach { rowItems ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 rowItems.forEach { item ->
-                    ExploreImageCard(
-                        label = item,
+                    PopularResultCard(
+                        item = item,
                         modifier = Modifier.weight(1f)
                     )
+                }
+
+                if (rowItems.size == 1) {
+                    Spacer(modifier = Modifier.weight(1f))
                 }
             }
         }
@@ -159,55 +311,64 @@ private fun ImageGrid(items: List<String>) {
 }
 
 @Composable
-private fun MetalwareRow() {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .border(2.dp, Color(0xFF2196F3)),
-        horizontalArrangement = Arrangement.spacedBy(2.dp)
-    ) {
-        listOf("trophy", "bell", "teapot").forEach { item ->
-            ExploreImageCard(
-                label = item,
-                modifier = Modifier.weight(1f),
-                height = 72
-            )
-        }
-    }
-}
-
-@Composable
-private fun ExploreImageCard(
-    label: String,
-    modifier: Modifier = Modifier,
-    height: Int = 72
+private fun PopularResultCard(
+    item: PopularItem,
+    modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = modifier.height(height.dp),
-        shape = RoundedCornerShape(2.dp),
-        border = BorderStroke(1.dp, Color.Gray),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFEFEFEF))
+        modifier = modifier.height(178.dp),
+        shape = RoundedCornerShape(6.dp),
+        border = BorderStroke(1.dp, ExploreBorder),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color(0xFFE8E1D3)),
-            contentAlignment = Alignment.Center
+        Column(
+            modifier = Modifier.fillMaxSize()
         ) {
-            Text(
-                text = label,
-                fontSize = 11.sp,
-                color = Color.DarkGray
-            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(104.dp)
+                    .background(item.color),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = item.imageLabel,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.DarkGray
+                )
 
-            // Replace the placeholder text above with an Image later:
-            //
-            // Image(
-            //     painter = painterResource(id = R.drawable.your_image_name),
-            //     contentDescription = label,
-            //     modifier = Modifier.fillMaxSize(),
-            //     contentScale = ContentScale.Crop
-            // )
+                Text(
+                    text = "Heart",
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp),
+                    fontSize = 10.sp,
+                    color = Color.Black
+                )
+            }
+
+            Column(
+                modifier = Modifier.padding(8.dp)
+            ) {
+                Text(
+                    text = item.name,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.Black,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = item.price,
+                    fontSize = 12.sp,
+                    color = ExploreGold,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
     }
 }
@@ -218,11 +379,11 @@ private fun ExploreBottomNavBar() {
         containerColor = Color.White,
         tonalElevation = 0.dp
     ) {
-        ExploreBottomNavItem("⌂", "Home", false)
-        ExploreBottomNavItem("◉", "Explore", true)
-        ExploreBottomNavItem("▾", "Orders", false)
-        ExploreBottomNavItem("☏", "Chat", false)
-        ExploreBottomNavItem("♡", "Account", false)
+        ExploreBottomNavItem("Home", "Home", false)
+        ExploreBottomNavItem("Explore", "Explore", true)
+        ExploreBottomNavItem("Orders", "Orders", false)
+        ExploreBottomNavItem("Chat", "Chat", false)
+        ExploreBottomNavItem("Account", "Account", false)
     }
 }
 
@@ -238,7 +399,8 @@ private fun RowScope.ExploreBottomNavItem(
         icon = {
             Text(
                 text = icon,
-                fontSize = 22.sp,
+                fontSize = 10.sp,
+                fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
                 color = Color.Black
             )
         },
@@ -255,14 +417,36 @@ private fun RowScope.ExploreBottomNavItem(
     )
 }
 
-private val varietyItems = listOf(
-    "cards",
-    "toys",
-    "poster",
-    "radio",
-    "comics",
-    "books",
-    "fossil",
-    "autograph",
-    "armor"
+private data class PopularItem(
+    val imageLabel: String,
+    val name: String,
+    val price: String,
+    val color: Color
+)
+
+private val popularItems = listOf(
+    PopularItem(
+        imageLabel = "Sneaker",
+        name = "MSCHF x INRI x Nike Air Max 97",
+        price = "P335,800.00",
+        color = Color(0xFFE8F0ED)
+    ),
+    PopularItem(
+        imageLabel = "Card",
+        name = "Charizard-Holo 2016 Pokemon",
+        price = "P143,671.00",
+        color = Color(0xFFFFF2E0)
+    ),
+    PopularItem(
+        imageLabel = "Toy",
+        name = "Vintage Tin Robot Collectible",
+        price = "P8,450.00",
+        color = Color(0xFFEDE7F6)
+    ),
+    PopularItem(
+        imageLabel = "Radio",
+        name = "Classic Wooden Radio",
+        price = "P5,731.63",
+        color = Color(0xFFE7E0D4)
+    )
 )
