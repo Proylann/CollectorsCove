@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,23 +18,20 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -43,66 +39,68 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.launch
 
 private val ExploreGold = Color(0xFFB8970A)
 private val ExploreLightGray = Color(0xFFF3F3F3)
 private val ExploreBorder = Color(0xFFD8D8D8)
 
 @Composable
-fun ExploreScreen() {
+fun ExploreScreen(
+    onMenuClick: () -> Unit,
+    onNotificationsClick: () -> Unit
+) {
     var query by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf("All") }
-    val drawerState = rememberDrawerState(DrawerValue.Closed)
-    val scope = rememberCoroutineScope()
 
-    AppMenuDrawer(drawerState = drawerState) {
-        Scaffold(
-            bottomBar = { ExploreBottomNavBar() },
-            containerColor = Color.White
-        ) { padding ->
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                item { Spacer(modifier = Modifier.height(24.dp)) }
-                item { ExploreTopBar(onMenuClick = { scope.launch { drawerState.open() } }) }
-                item {
-                    SearchBar(
-                        query = query,
-                        onQueryChange = { query = it }
-                    )
-                }
-                item {
-                    CategoryChips(
-                        selectedCategory = selectedCategory,
-                        onCategorySelected = { selectedCategory = it }
-                    )
-                }
-                item { SectionTitle("Recent Searches") }
-                item { RecentSearches() }
-                item { SectionTitle("Popular Results") }
-                item { PopularResultsGrid() }
-                item { Spacer(modifier = Modifier.height(24.dp)) }
-            }
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        item { Spacer(modifier = Modifier.height(24.dp)) }
+        item { 
+            ExploreTopBar(
+                onMenuClick = onMenuClick,
+                onNotificationsClick = onNotificationsClick
+            ) 
         }
+        item {
+            SearchBar(
+                query = query,
+                onQueryChange = { query = it }
+            )
+        }
+        item {
+            CategoryChips(
+                selectedCategory = selectedCategory,
+                onCategorySelected = { selectedCategory = it }
+            )
+        }
+        item { SectionTitle("Recent Searches") }
+        item { RecentSearches() }
+        item { SectionTitle("Popular Results") }
+        item { PopularResultsGrid() }
+        item { Spacer(modifier = Modifier.height(24.dp)) }
     }
 }
 
 @Composable
-private fun ExploreTopBar(onMenuClick: () -> Unit) {
+private fun ExploreTopBar(
+    onMenuClick: () -> Unit,
+    onNotificationsClick: () -> Unit
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = "☰",
-            modifier = Modifier.clickable(onClick = onMenuClick),
-            fontSize = 28.sp,
-            color = Color.Black
+        Icon(
+            imageVector = Icons.Default.Menu,
+            contentDescription = "Menu",
+            modifier = Modifier
+                .size(28.dp)
+                .clickable(onClick = onMenuClick),
+            tint = Color.Black
         )
 
         Spacer(modifier = Modifier.weight(1f))
@@ -111,7 +109,14 @@ private fun ExploreTopBar(onMenuClick: () -> Unit) {
 
         Spacer(modifier = Modifier.weight(1f))
 
-        Text("Bell", fontSize = 11.sp, color = Color.Black)
+        Icon(
+            imageVector = Icons.Default.Notifications,
+            contentDescription = "Notifications",
+            modifier = Modifier
+                .size(24.dp)
+                .clickable(onClick = onNotificationsClick),
+            tint = Color.Black
+        )
     }
 }
 
@@ -371,50 +376,6 @@ private fun PopularResultCard(
             }
         }
     }
-}
-
-@Composable
-private fun ExploreBottomNavBar() {
-    NavigationBar(
-        containerColor = Color.White,
-        tonalElevation = 0.dp
-    ) {
-        ExploreBottomNavItem("Home", "Home", false)
-        ExploreBottomNavItem("Explore", "Explore", true)
-        ExploreBottomNavItem("Orders", "Orders", false)
-        ExploreBottomNavItem("Chat", "Chat", false)
-        ExploreBottomNavItem("Account", "Account", false)
-    }
-}
-
-@Composable
-private fun RowScope.ExploreBottomNavItem(
-    icon: String,
-    label: String,
-    selected: Boolean
-) {
-    NavigationBarItem(
-        selected = selected,
-        onClick = {},
-        icon = {
-            Text(
-                text = icon,
-                fontSize = 10.sp,
-                fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-                color = Color.Black
-            )
-        },
-        label = {
-            Text(
-                text = label,
-                fontSize = 8.sp,
-                color = Color.Black
-            )
-        },
-        colors = NavigationBarItemDefaults.colors(
-            indicatorColor = Color.Transparent
-        )
-    )
 }
 
 private data class PopularItem(

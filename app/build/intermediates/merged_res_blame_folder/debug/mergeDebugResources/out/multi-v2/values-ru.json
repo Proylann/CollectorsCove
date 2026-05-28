@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.collectorscove.app-mergeDebugResources-36:/values-ru/values-ru.xml",
+            "outputFile": "com.example.collectorscove.app-mergeDebugResources-43:/values-ru/values-ru.xml",
             "map": [
                 {
                     "source": "C:\\Users\\heath\\.gradle\\caches\\9.4.1\\transforms\\0ea4d4b9a234e4e991e2a60e39315277\\transformed\\ui\\res\\values-ru\\values-ru.xml",

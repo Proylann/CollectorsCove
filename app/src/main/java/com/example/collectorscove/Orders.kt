@@ -15,24 +15,22 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,7 +39,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.launch
 
 private enum class OrderTab(val title: String) {
     Ongoing("Ongoing"),
@@ -51,43 +48,38 @@ private enum class OrderTab(val title: String) {
 }
 
 @Composable
-fun OrderScreen() {
+fun OrderScreen(
+    onMenuClick: () -> Unit,
+    onNotificationsClick: () -> Unit
+) {
     var selectedTab by remember { mutableStateOf(OrderTab.Ongoing) }
-    val drawerState = rememberDrawerState(DrawerValue.Closed)
-    val scope = rememberCoroutineScope()
 
-    AppMenuDrawer(drawerState = drawerState) {
-        Scaffold(
-            bottomBar = { OrderBottomNavBar() },
-            containerColor = Color.White
-        ) { padding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-            ) {
-                OrderTopBar(onMenuClick = { scope.launch { drawerState.open() } })
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        OrderTopBar(
+            onMenuClick = onMenuClick,
+            onNotificationsClick = onNotificationsClick
+        )
 
-                OrderTabs(
-                    selectedTab = selectedTab,
-                    onTabSelected = { selectedTab = it }
-                )
+        OrderTabs(
+            selectedTab = selectedTab,
+            onTabSelected = { selectedTab = it }
+        )
 
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 26.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = PaddingValues(top = 14.dp, bottom = 24.dp)
-                ) {
-                    items(5) { index ->
-                        when (selectedTab) {
-                            OrderTab.Ongoing -> OngoingOrderCard()
-                            OrderTab.Completed -> CompletedOrderCard()
-                            OrderTab.Bids -> BidOrderCard()
-                            OrderTab.Review -> ReviewOrderCard(showReviewBox = index == 0)
-                        }
-                    }
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 26.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(top = 14.dp, bottom = 24.dp)
+        ) {
+            items(5) { index ->
+                when (selectedTab) {
+                    OrderTab.Ongoing -> OngoingOrderCard()
+                    OrderTab.Completed -> CompletedOrderCard()
+                    OrderTab.Bids -> BidOrderCard()
+                    OrderTab.Review -> ReviewOrderCard(showReviewBox = index == 0)
                 }
             }
         }
@@ -95,18 +87,23 @@ fun OrderScreen() {
 }
 
 @Composable
-private fun OrderTopBar(onMenuClick: () -> Unit) {
+private fun OrderTopBar(
+    onMenuClick: () -> Unit,
+    onNotificationsClick: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 26.dp, end = 26.dp, top = 30.dp, bottom = 28.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = "☰",
-            modifier = Modifier.clickable(onClick = onMenuClick),
-            fontSize = 34.sp,
-            color = Color.Black
+        Icon(
+            imageVector = Icons.Default.Menu,
+            contentDescription = "Menu",
+            modifier = Modifier
+                .size(34.dp)
+                .clickable(onClick = onMenuClick),
+            tint = Color.Black
         )
 
         Spacer(modifier = Modifier.width(12.dp))
@@ -120,10 +117,13 @@ private fun OrderTopBar(onMenuClick: () -> Unit) {
 
         Spacer(modifier = Modifier.weight(1f))
 
-        Text(
-            text = "Clear History",
-            fontSize = 12.sp,
-            color = Color.Gray
+        Icon(
+            imageVector = Icons.Default.Notifications,
+            contentDescription = "Notifications",
+            modifier = Modifier
+                .size(24.dp)
+                .clickable(onClick = onNotificationsClick),
+            tint = Color.Black
         )
     }
 }
@@ -298,33 +298,4 @@ private fun ProductThumb() {
     ) {
         Text("Card", fontSize = 5.sp, color = Color(0xFFB08C00))
     }
-}
-
-@Composable
-private fun OrderBottomNavBar() {
-    NavigationBar(containerColor = Color.White, tonalElevation = 0.dp) {
-        OrderBottomNavItem("Home", "Home", false)
-        OrderBottomNavItem("Explore", "Explore", false)
-        OrderBottomNavItem("Orders", "Orders", true)
-        OrderBottomNavItem("Chat", "Chat", false)
-        OrderBottomNavItem("Account", "Account", false)
-    }
-}
-
-@Composable
-private fun RowScope.OrderBottomNavItem(icon: String, label: String, selected: Boolean) {
-    NavigationBarItem(
-        selected = selected,
-        onClick = {},
-        icon = {
-            Text(
-                text = icon,
-                fontSize = 10.sp,
-                fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-                color = Color.Black
-            )
-        },
-        label = { Text(text = label, fontSize = 8.sp, color = Color.Black) },
-        colors = NavigationBarItemDefaults.colors(indicatorColor = Color.Transparent)
-    )
 }

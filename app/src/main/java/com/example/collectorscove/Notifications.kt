@@ -39,63 +39,52 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun NotificationScreen() {
-    val drawerState = rememberDrawerState(DrawerValue.Closed)
-    val scope = rememberCoroutineScope()
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp)
+    ) {
+        Spacer(modifier = Modifier.height(36.dp))
+        NotificationTopBar(onMenuClick = { /* Handled globally */ })
+        Spacer(modifier = Modifier.height(18.dp))
 
-    AppMenuDrawer(drawerState = drawerState) {
-        Scaffold(
-            bottomBar = { NotificationBottomNavBar() },
-            containerColor = Color.White
-        ) { padding ->
-            Column(
+        Text("Notifications", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+
+        Spacer(modifier = Modifier.height(18.dp))
+
+        Text("A minute ago", fontSize = 14.sp, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(8.dp))
+        NotificationCard(
+            beforeLink = "Bid is closing in 2 minutes! ",
+            link = "View Bid on Nike Air ..."
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text("Today", fontSize = 14.sp, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(8.dp))
+        NotificationCard(
+            beforeLink = "Look! a new post from Danny. ",
+            link = "View Post"
+        )
+
+        Spacer(modifier = Modifier.height(48.dp))
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .size(48.dp)
+                .background(Color(0xFF03A9F4), CircleShape)
+                .padding(6.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(padding)
-                    .padding(horizontal = 16.dp)
+                    .background(Color.White, CircleShape),
+                contentAlignment = Alignment.Center
             ) {
-                Spacer(modifier = Modifier.height(36.dp))
-                NotificationTopBar(onMenuClick = { scope.launch { drawerState.open() } })
-                Spacer(modifier = Modifier.height(18.dp))
-
-                Text("Notifications", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-
-                Spacer(modifier = Modifier.height(18.dp))
-
-                Text("A minute ago", fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.height(8.dp))
-                NotificationCard(
-                    beforeLink = "Bid is closing in 2 minutes! ",
-                    link = "View Bid on Nike Air ..."
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text("Today", fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.height(8.dp))
-                NotificationCard(
-                    beforeLink = "Look! a new post from Danny. ",
-                    link = "View Post"
-                )
-
-                Spacer(modifier = Modifier.height(48.dp))
-
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                        .size(48.dp)
-                        .background(Color(0xFF03A9F4), CircleShape)
-                        .padding(6.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.White, CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("Bell", fontSize = 10.sp)
-                    }
-                }
+                Text("Bell", fontSize = 10.sp)
             }
         }
     }

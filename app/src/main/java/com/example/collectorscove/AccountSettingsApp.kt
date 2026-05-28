@@ -26,7 +26,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -34,17 +33,14 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,7 +52,6 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.launch
 
 private val GoldButton = Color(0xFFB8970A)
 private val TextPrimary = Color(0xFF1A1A1A)
@@ -75,13 +70,11 @@ private enum class AccountPage {
 @Composable
 fun AccountSettingsApp() {
     var page by remember { mutableStateOf(AccountPage.Settings) }
-    val drawerState = rememberDrawerState(DrawerValue.Closed)
-    val scope = rememberCoroutineScope()
 
     when (page) {
-        AccountPage.Settings -> AppMenuDrawer(drawerState = drawerState) {
+        AccountPage.Settings -> {
             AccountSettingsScreen(
-                onMenuClick = { scope.launch { drawerState.open() } },
+                onMenuClick = { /* Handled globally */ },
                 onChangePassword = { page = AccountPage.ChangePassword },
                 onBankCards = { page = AccountPage.BankCards },
                 onPrivacySettings = { page = AccountPage.PrivacySettings },
@@ -115,104 +108,98 @@ private fun AccountSettingsScreen(
     onPrivacySettings: () -> Unit,
     onPaymentHistory: () -> Unit
 ) {
-    Scaffold(
-        bottomBar = { AppBottomBar(selectedIndex = 4) },
-        containerColor = Color.White
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 16.dp)
-                .verticalScroll(rememberScrollState())
-        ) {
-            Spacer(Modifier.height(16.dp))
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp)
+            .verticalScroll(rememberScrollState())
+    ) {
+        Spacer(Modifier.height(16.dp))
 
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = "☰",
-                    modifier = Modifier.clickable(onClick = onMenuClick),
-                    fontSize = 28.sp,
-                    color = TextPrimary
-                )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = "☰",
+                modifier = Modifier.clickable(onClick = onMenuClick),
+                fontSize = 28.sp,
+                color = TextPrimary
+            )
+
+            Spacer(Modifier.width(12.dp))
+
+            Text(
+                text = "Account Settings",
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                color = TextPrimary
+            )
+        }
+
+        Spacer(Modifier.height(16.dp))
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(2.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(52.dp)
+                        .background(Color(0xFFDDDDDD), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("👤", fontSize = 26.sp)
+                }
 
                 Spacer(Modifier.width(12.dp))
 
-                Text(
-                    text = "Account Settings",
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TextPrimary
-                )
-            }
-
-            Spacer(Modifier.height(16.dp))
-
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(2.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(52.dp)
-                            .background(Color(0xFFDDDDDD), CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("👤", fontSize = 26.sp)
-                    }
-
-                    Spacer(Modifier.width(12.dp))
-
-                    Column {
-                        Text("John Lennon", fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
-                        Text("View Profile", fontSize = 12.sp, color = TextSecondary)
-                    }
+                Column {
+                    Text("John Lennon", fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
+                    Text("View Profile", fontSize = 12.sp, color = TextSecondary)
                 }
             }
-
-            Spacer(Modifier.height(20.dp))
-            SectionLabel("Basic Information")
-            Spacer(Modifier.height(4.dp))
-
-            InfoRow("Name", "John Lennon")
-            InfoRow("Gender", "Male")
-            InfoRow("Location", "Pasig City")
-            InfoRow("Email", "john@gmail.com")
-
-            Spacer(Modifier.height(20.dp))
-            SectionLabel("Settings")
-            Spacer(Modifier.height(4.dp))
-
-            HorizontalDivider(color = DividerColor)
-            SettingsRow("Change Password", onChangePassword)
-            SettingsRow("Bank Account / Cards", onBankCards)
-            SettingsRow("Privacy Settings", onPrivacySettings)
-            SettingsRow("Payment History", onPaymentHistory)
-
-            Spacer(Modifier.height(24.dp))
-
-            OutlinedButton(
-                onClick = {},
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp),
-                shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary),
-                border = BorderStroke(1.dp, CardBorder)
-            ) {
-                Text("Logout", fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
-            }
-
-            Spacer(Modifier.height(16.dp))
         }
+
+        Spacer(Modifier.height(20.dp))
+        SectionLabel("Basic Information")
+        Spacer(Modifier.height(4.dp))
+
+        InfoRow("Name", "John Lennon")
+        InfoRow("Gender", "Male")
+        InfoRow("Location", "Pasig City")
+        InfoRow("Email", "john@gmail.com")
+
+        Spacer(Modifier.height(20.dp))
+        SectionLabel("Settings")
+        Spacer(Modifier.height(4.dp))
+
+        HorizontalDivider(color = DividerColor)
+        SettingsRow("Change Password", onChangePassword)
+        SettingsRow("Bank Account / Cards", onBankCards)
+        SettingsRow("Privacy Settings", onPrivacySettings)
+        SettingsRow("Payment History", onPaymentHistory)
+
+        Spacer(Modifier.height(24.dp))
+
+        OutlinedButton(
+            onClick = {},
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp),
+            shape = RoundedCornerShape(8.dp),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary),
+            border = BorderStroke(1.dp, CardBorder)
+        ) {
+            Text("Logout", fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+        }
+
+        Spacer(Modifier.height(16.dp))
     }
 }
 
@@ -223,78 +210,72 @@ private fun ChangePasswordScreen(onBack: () -> Unit) {
     var confirmPassword by remember { mutableStateOf("") }
     var showPassword by remember { mutableStateOf(false) }
 
-    Scaffold(
-        bottomBar = { AppBottomBar(selectedIndex = 4) },
-        containerColor = Color.White
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 16.dp)
-        ) {
-            Spacer(Modifier.height(16.dp))
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp)
+    ) {
+        Spacer(Modifier.height(16.dp))
 
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = "‹",
-                    modifier = Modifier.clickable(onClick = onBack),
-                    fontSize = 40.sp,
-                    color = TextPrimary
-                )
-                Spacer(Modifier.width(4.dp))
-                Text("Change Password", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-            }
-
-            Spacer(Modifier.height(24.dp))
-
-            PasswordField(
-                value = currentPassword,
-                onValueChange = { currentPassword = it },
-                placeholder = "Current Password",
-                showPassword = showPassword,
-                onToggleVisibility = { showPassword = !showPassword }
-            )
-            Spacer(Modifier.height(12.dp))
-
-            PasswordField(
-                value = newPassword,
-                onValueChange = { newPassword = it },
-                placeholder = "New Password",
-                showPassword = showPassword,
-                onToggleVisibility = { showPassword = !showPassword }
-            )
-            Spacer(Modifier.height(12.dp))
-
-            PasswordField(
-                value = confirmPassword,
-                onValueChange = { confirmPassword = it },
-                placeholder = "Confirm Password",
-                showPassword = showPassword,
-                onToggleVisibility = { showPassword = !showPassword }
-            )
-
-            Spacer(Modifier.height(10.dp))
-
+        Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = "Password should contain letters, numbers, and special characters",
-                fontSize = 12.sp,
-                color = TextSecondary,
-                lineHeight = 18.sp
+                text = "‹",
+                modifier = Modifier.clickable(onClick = onBack),
+                fontSize = 40.sp,
+                color = TextPrimary
             )
+            Spacer(Modifier.width(4.dp))
+            Text("Change Password", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+        }
 
-            Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(24.dp))
 
-            Button(
-                onClick = {},
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp),
-                shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = GoldButton)
-            ) {
-                Text("CHANGE PASSWORD", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Color.White)
-            }
+        PasswordField(
+            value = currentPassword,
+            onValueChange = { currentPassword = it },
+            placeholder = "Current Password",
+            showPassword = showPassword,
+            onToggleVisibility = { showPassword = !showPassword }
+        )
+        Spacer(Modifier.height(12.dp))
+
+        PasswordField(
+            value = newPassword,
+            onValueChange = { newPassword = it },
+            placeholder = "New Password",
+            showPassword = showPassword,
+            onToggleVisibility = { showPassword = !showPassword }
+        )
+        Spacer(Modifier.height(12.dp))
+
+        PasswordField(
+            value = confirmPassword,
+            onValueChange = { confirmPassword = it },
+            placeholder = "Confirm Password",
+            showPassword = showPassword,
+            onToggleVisibility = { showPassword = !showPassword }
+        )
+
+        Spacer(Modifier.height(10.dp))
+
+        Text(
+            text = "Password should contain letters, numbers, and special characters",
+            fontSize = 12.sp,
+            color = TextSecondary,
+            lineHeight = 18.sp
+        )
+
+        Spacer(Modifier.height(24.dp))
+
+        Button(
+            onClick = {},
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
+            shape = RoundedCornerShape(8.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = GoldButton)
+        ) {
+            Text("CHANGE PASSWORD", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Color.White)
         }
     }
 }
@@ -303,64 +284,58 @@ private fun ChangePasswordScreen(onBack: () -> Unit) {
 private fun BankCardsScreen(onBack: () -> Unit) {
     var showAddDialog by remember { mutableStateOf(false) }
 
-    Scaffold(
-        bottomBar = { AppBottomBar(selectedIndex = 4) },
-        containerColor = Color.White
-    ) { padding ->
-        Column(
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp)
+    ) {
+        Spacer(Modifier.height(16.dp))
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = "‹",
+                modifier = Modifier.clickable(onClick = onBack),
+                fontSize = 40.sp,
+                color = TextPrimary
+            )
+            Spacer(Modifier.width(4.dp))
+            Text("Bank Account & Cards", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+        }
+
+        Spacer(Modifier.height(20.dp))
+        CardItem("John John B. Doe", "1234 **** **** 5687")
+        Spacer(Modifier.height(12.dp))
+
+        Card(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 16.dp)
+                .fillMaxWidth()
+                .clickable { showAddDialog = true },
+            shape = RoundedCornerShape(10.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(1.dp)
         ) {
-            Spacer(Modifier.height(16.dp))
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = "‹",
-                    modifier = Modifier.clickable(onClick = onBack),
-                    fontSize = 40.sp,
-                    color = TextPrimary
-                )
-                Spacer(Modifier.width(4.dp))
-                Text("Bank Account & Cards", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-            }
-
-            Spacer(Modifier.height(20.dp))
-            CardItem("John John B. Doe", "1234 **** **** 5687")
-            Spacer(Modifier.height(12.dp))
-
-            Card(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { showAddDialog = true },
-                shape = RoundedCornerShape(10.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(1.dp)
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("+ Add New Card", fontSize = 15.sp, fontWeight = FontWeight.Medium)
-                }
+                Text("+ Add New Card", fontSize = 15.sp, fontWeight = FontWeight.Medium)
             }
         }
-    }
 
-    if (showAddDialog) {
-        AlertDialog(
-            onDismissRequest = { showAddDialog = false },
-            title = { Text("Add New Card") },
-            text = { Text("Card addition flow goes here.") },
-            confirmButton = {
-                TextButton(onClick = { showAddDialog = false }) {
-                    Text("OK")
+        if (showAddDialog) {
+            AlertDialog(
+                onDismissRequest = { showAddDialog = false },
+                title = { Text("Add New Card") },
+                text = { Text("Card addition flow goes here.") },
+                confirmButton = {
+                    TextButton(onClick = { showAddDialog = false }) {
+                        Text("OK")
+                    }
                 }
-            }
-        )
+            )
+        }
     }
 }
 
@@ -370,90 +345,84 @@ private fun PrivacySettingsScreen(onBack: () -> Unit) {
     var notificationsEnabled by remember { mutableStateOf(true) }
     var locationEnabled by remember { mutableStateOf(true) }
 
-    Scaffold(
-        bottomBar = { AppBottomBar(selectedIndex = 4) },
-        containerColor = Color.White
-    ) { padding ->
-        Column(
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 24.dp)
+    ) {
+        Spacer(Modifier.height(18.dp))
+
+        AccountHeader(title = "Privacy Settings", onBack = onBack)
+
+        Spacer(Modifier.height(36.dp))
+
+        Text(
+            text = "Set who can message you",
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            color = TextPrimary
+        )
+
+        Spacer(Modifier.height(18.dp))
+
+        PrivacyRadioRow(
+            label = "No one",
+            selected = messageChoice == "No one",
+            onClick = { messageChoice = "No one" }
+        )
+
+        PrivacyRadioRow(
+            label = "Everyone",
+            selected = messageChoice == "Everyone",
+            onClick = { messageChoice = "Everyone" }
+        )
+
+        Spacer(Modifier.height(22.dp))
+
+        Text(
+            text = "App Permissions",
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            color = TextPrimary
+        )
+
+        Spacer(Modifier.height(12.dp))
+
+        PermissionRow(
+            label = "Allow Collector's Cove to send notifications",
+            checked = notificationsEnabled,
+            onCheckedChange = { notificationsEnabled = it }
+        )
+
+        PermissionRow(
+            label = "Allow Collector's Cove to access location",
+            checked = locationEnabled,
+            onCheckedChange = { locationEnabled = it }
+        )
+
+        Spacer(Modifier.height(24.dp))
+
+        Row(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 24.dp)
+                .fillMaxWidth()
+                .height(42.dp)
+                .border(1.dp, Color.Gray, RoundedCornerShape(3.dp))
+                .padding(horizontal = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Spacer(Modifier.height(18.dp))
+            Text(
+                text = "Delete my Account",
+                fontSize = 12.sp,
+                color = Color.Red
+            )
 
-            AccountHeader(title = "Privacy Settings", onBack = onBack)
-
-            Spacer(Modifier.height(36.dp))
+            Spacer(Modifier.weight(1f))
 
             Text(
-                text = "Set who can message you",
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
+                text = "Delete",
+                fontSize = 11.sp,
                 color = TextPrimary
             )
-
-            Spacer(Modifier.height(18.dp))
-
-            PrivacyRadioRow(
-                label = "No one",
-                selected = messageChoice == "No one",
-                onClick = { messageChoice = "No one" }
-            )
-
-            PrivacyRadioRow(
-                label = "Everyone",
-                selected = messageChoice == "Everyone",
-                onClick = { messageChoice = "Everyone" }
-            )
-
-            Spacer(Modifier.height(22.dp))
-
-            Text(
-                text = "App Permissions",
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextPrimary
-            )
-
-            Spacer(Modifier.height(12.dp))
-
-            PermissionRow(
-                label = "Allow Collector's Cove to send notifications",
-                checked = notificationsEnabled,
-                onCheckedChange = { notificationsEnabled = it }
-            )
-
-            PermissionRow(
-                label = "Allow Collector's Cove to access location",
-                checked = locationEnabled,
-                onCheckedChange = { locationEnabled = it }
-            )
-
-            Spacer(Modifier.height(24.dp))
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(42.dp)
-                    .border(1.dp, Color.Gray, RoundedCornerShape(3.dp))
-                    .padding(horizontal = 14.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Delete my Account",
-                    fontSize = 12.sp,
-                    color = Color.Red
-                )
-
-                Spacer(Modifier.weight(1f))
-
-                Text(
-                    text = "Delete",
-                    fontSize = 11.sp,
-                    color = TextPrimary
-                )
-            }
         }
     }
 }
@@ -462,66 +431,60 @@ private fun PrivacySettingsScreen(onBack: () -> Unit) {
 private fun PaymentHistoryScreen(onBack: () -> Unit) {
     var hasHistory by remember { mutableStateOf(true) }
 
-    Scaffold(
-        bottomBar = { AppBottomBar(selectedIndex = 4) },
-        containerColor = Color.White
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 24.dp)
-        ) {
-            Spacer(Modifier.height(18.dp))
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 24.dp)
+    ) {
+        Spacer(Modifier.height(18.dp))
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "<",
+                modifier = Modifier.clickable(onClick = onBack),
+                fontSize = 34.sp,
+                color = TextPrimary
+            )
+
+            Spacer(Modifier.width(6.dp))
+
+            Text(
+                text = "Payments",
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                color = TextPrimary
+            )
+
+            Spacer(Modifier.weight(1f))
+
+            Text(
+                text = "Clear History",
+                modifier = Modifier.clickable { hasHistory = false },
+                fontSize = 11.sp,
+                color = TextSecondary
+            )
+        }
+
+        if (hasHistory) {
+            Spacer(Modifier.height(52.dp))
+
+            repeat(3) {
+                PaymentHistoryCard()
+                Spacer(Modifier.height(12.dp))
+            }
+        } else {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "<",
-                    modifier = Modifier.clickable(onClick = onBack),
-                    fontSize = 34.sp,
-                    color = TextPrimary
-                )
-
-                Spacer(Modifier.width(6.dp))
-
-                Text(
-                    text = "Payments",
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TextPrimary
-                )
-
-                Spacer(Modifier.weight(1f))
-
-                Text(
-                    text = "Clear History",
-                    modifier = Modifier.clickable { hasHistory = false },
-                    fontSize = 11.sp,
+                    text = "No Recent History",
+                    fontSize = 13.sp,
                     color = TextSecondary
                 )
-            }
-
-            if (hasHistory) {
-                Spacer(Modifier.height(52.dp))
-
-                repeat(3) {
-                    PaymentHistoryCard()
-                    Spacer(Modifier.height(12.dp))
-                }
-            } else {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "No Recent History",
-                        fontSize = 13.sp,
-                        color = TextSecondary
-                    )
-                }
             }
         }
     }
@@ -748,51 +711,4 @@ private fun CardItem(holderName: String, maskedNumber: String) {
             }
         }
     }
-}
-
-@Composable
-private fun AppBottomBar(selectedIndex: Int = 4) {
-    val items = listOf(
-        "⌂" to "Home",
-        "◉" to "Explore",
-        "▾" to "Orders",
-        "☏" to "Chat",
-        "♡" to "Account"
-    )
-
-    NavigationBar(
-        containerColor = Color.White,
-        tonalElevation = 4.dp
-    ) {
-        items.forEachIndexed { index, item ->
-            AppBottomItem(
-                icon = item.first,
-                label = item.second,
-                selected = index == selectedIndex
-            )
-        }
-    }
-}
-
-@Composable
-private fun RowScope.AppBottomItem(icon: String, label: String, selected: Boolean) {
-    NavigationBarItem(
-        selected = selected,
-        onClick = {},
-        icon = {
-            Text(
-                text = icon,
-                fontSize = 22.sp,
-                color = if (selected) TextPrimary else TextSecondary
-            )
-        },
-        label = {
-            Text(
-                text = label,
-                fontSize = 9.sp,
-                color = if (selected) TextPrimary else TextSecondary
-            )
-        },
-        colors = NavigationBarItemDefaults.colors(indicatorColor = Color.Transparent)
-    )
 }
