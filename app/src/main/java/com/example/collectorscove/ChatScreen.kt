@@ -20,19 +20,15 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,7 +36,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.launch
+import com.example.collectorscove.ui.theme.CoveBackground
+import com.example.collectorscove.ui.theme.CoveBorder
+import com.example.collectorscove.ui.theme.CoveGold
+import com.example.collectorscove.ui.theme.CoveLightGray
+import com.example.collectorscove.ui.theme.CoveSurface
 
 private data class ChatMessage(
     val text: String,
@@ -48,7 +48,10 @@ private data class ChatMessage(
 )
 
 @Composable
-fun ChatScreen() {
+fun ChatScreen(
+    onMenuClick: () -> Unit,
+    onNotificationsClick: () -> Unit
+) {
     val messages = remember {
         mutableStateListOf(
             ChatMessage(
@@ -67,78 +70,66 @@ fun ChatScreen() {
     }
     var typedMessage by remember { mutableStateOf("") }
 
-    Scaffold(
-        topBar = { ChatTopBar(onMenuClick = { /* Handled globally */ }) },
-        bottomBar = {
-            ChatInputBar(
-                value = typedMessage,
-                onValueChange = { typedMessage = it },
-                onSend = {
-                    if (typedMessage.isNotBlank()) {
-                        messages.add(ChatMessage(typedMessage.trim(), fromUser = true))
-                        typedMessage = ""
-                    }
-                }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(CoveBackground)
+    ) {
+        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+            Spacer(modifier = Modifier.height(24.dp))
+            AppTopBar(
+                onMenuClick = onMenuClick,
+                onNotificationsClick = onNotificationsClick
             )
-        },
-        containerColor = Color.White
-    ) { padding ->
+            Spacer(modifier = Modifier.height(12.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "123 Store",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+                Spacer(Modifier.weight(1f))
+                Text(
+                    text = "...",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = CoveGold
+                )
+            }
+        }
+
+        HorizontalDivider(
+            modifier = Modifier.padding(top = 12.dp),
+            color = CoveBorder
+        )
+
         LazyColumn(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 14.dp),
+                .weight(1f)
+                .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.Bottom
         ) {
+            item { Spacer(Modifier.height(12.dp)) }
             items(messages) { message ->
                 ChatBubbleRow(message)
                 Spacer(Modifier.height(12.dp))
             }
         }
-    }
-}
 
-@Composable
-private fun ChatTopBar(onMenuClick: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color.White)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp)
-                .padding(horizontal = 10.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "☰",
-                modifier = Modifier.clickable(onClick = onMenuClick),
-                fontSize = 22.sp,
-                color = Color.Black
-            )
-
-            Spacer(Modifier.width(14.dp))
-
-            Text(
-                text = "123 Store",
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black
-            )
-
-            Spacer(Modifier.weight(1f))
-
-            Text(
-                text = "...",
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFFB8970A)
-            )
-        }
-
-        HorizontalDivider(color = Color(0xFFE0E0E0))
+        ChatInputBar(
+            value = typedMessage,
+            onValueChange = { typedMessage = it },
+            onSend = {
+                if (typedMessage.isNotBlank()) {
+                    messages.add(ChatMessage(typedMessage.trim(), fromUser = true))
+                    typedMessage = ""
+                }
+            }
+        )
     }
 }
 
@@ -157,8 +148,9 @@ private fun ChatBubbleRow(message: ChatMessage) {
         Box(
             modifier = Modifier
                 .width(if (message.text.length > 40) 192.dp else 122.dp)
-                .clip(RoundedCornerShape(4.dp))
-                .background(Color(0xFFE9EAED))
+                .clip(RoundedCornerShape(12.dp))
+                .background(if (message.fromUser) CoveGold.copy(alpha = 0.15f) else CoveLightGray)
+                .border(1.dp, CoveBorder, RoundedCornerShape(12.dp))
                 .padding(horizontal = 8.dp, vertical = 8.dp)
         ) {
             Text(
@@ -181,7 +173,8 @@ private fun AvatarDot() {
     Box(
         modifier = Modifier
             .size(20.dp)
-            .background(Color(0xFFD9D9D9), CircleShape)
+            .background(CoveGold.copy(alpha = 0.3f), CircleShape)
+            .border(1.dp, CoveGold, CircleShape)
     )
 }
 
@@ -194,9 +187,9 @@ private fun ChatInputBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color(0xFFB89D08))
+            .background(CoveGold)
             .imePadding()
-            .padding(horizontal = 22.dp, vertical = 8.dp),
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         OutlinedTextField(
@@ -213,12 +206,12 @@ private fun ChatInputBar(
                 .weight(1f)
                 .height(40.dp),
             singleLine = true,
-            shape = RoundedCornerShape(4.dp),
+            shape = RoundedCornerShape(8.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
-                focusedBorderColor = Color.White,
-                unfocusedBorderColor = Color.White,
+                focusedContainerColor = CoveSurface,
+                unfocusedContainerColor = CoveSurface,
+                focusedBorderColor = CoveSurface,
+                unfocusedBorderColor = CoveSurface,
                 cursorColor = Color.Black
             )
         )
@@ -229,7 +222,6 @@ private fun ChatInputBar(
             modifier = Modifier
                 .size(34.dp)
                 .clip(CircleShape)
-                .border(0.dp, Color.Transparent, CircleShape)
                 .clickable(onClick = onSend),
             contentAlignment = Alignment.Center
         ) {

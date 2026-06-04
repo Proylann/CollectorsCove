@@ -20,21 +20,24 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.collectorscove.ui.theme.CoveBackground
+import com.example.collectorscove.ui.theme.CoveBorder
+import com.example.collectorscove.ui.theme.CoveGold
+import com.example.collectorscove.ui.theme.CoveSurface
 
 @Composable
-fun LoginScreen() {
+fun LoginScreen(onSignIn: () -> Unit = {}) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(CoveBackground)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.White)
                 .padding(horizontal = 42.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -90,13 +93,13 @@ fun LoginScreen() {
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = { },
+                onClick = onSignIn,
                 modifier = Modifier
                     .width(108.dp)
                     .height(44.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF171310),
-                    contentColor = Color.White
+                    containerColor = CoveGold,
+                    contentColor = CoveSurface
                 )
             ) {
                 Text("Sign in", fontSize = 14.sp)
@@ -160,10 +163,10 @@ private fun LoginInput(
         textStyle = TextStyle(fontSize = 14.sp),
         visualTransformation = if (isPassword) PasswordVisualTransformation() else androidx.compose.ui.text.input.VisualTransformation.None,
         colors = TextFieldDefaults.colors(
-            focusedContainerColor = Color.White,
-            unfocusedContainerColor = Color.White,
-            focusedIndicatorColor = Color.Black,
-            unfocusedIndicatorColor = Color.Black,
+            focusedContainerColor = CoveSurface,
+            unfocusedContainerColor = CoveSurface,
+            focusedIndicatorColor = CoveGold,
+            unfocusedIndicatorColor = CoveBorder,
             cursorColor = Color.Black
         )
     )
@@ -179,7 +182,7 @@ private fun LogoText() {
             modifier = Modifier
                 .size(64.dp)
                 .align(Alignment.CenterStart)
-                .background(Color(0xFFBFA619), shape = androidx.compose.foundation.shape.CircleShape)
+                .background(CoveGold, shape = androidx.compose.foundation.shape.CircleShape)
         )
 
         Column(

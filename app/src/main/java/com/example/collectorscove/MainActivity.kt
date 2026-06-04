@@ -3,7 +3,7 @@ package com.example.collectorscove
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.navigation.compose.rememberNavController
+import com.example.collectorscove.ui.theme.CollectorsCoveTheme
 
 class MainActivity : ComponentActivity() {
 
@@ -11,7 +11,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            AppNavigation()
+            CollectorsCoveTheme {
+                AppNavigation()
+            }
         }
     }
 }

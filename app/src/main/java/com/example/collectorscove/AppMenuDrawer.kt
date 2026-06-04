@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.DrawerState
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Text
@@ -24,11 +25,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.collectorscove.ui.theme.CoveBorder
+import com.example.collectorscove.ui.theme.CoveGold
+import com.example.collectorscove.ui.theme.CoveLightGray
+import com.example.collectorscove.ui.theme.CoveSurface
+import com.example.collectorscove.ui.theme.CoveTextSecondary
 import kotlinx.coroutines.launch
 
 @Composable
 fun AppMenuDrawer(
     drawerState: DrawerState,
+    onMenuItemClick: (String) -> Unit = {},
+    onViewProfileClick: () -> Unit = {},
+    onLogoutClick: () -> Unit = {},
     content: @Composable () -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -40,26 +49,26 @@ fun AppMenuDrawer(
                 modifier = Modifier
                     .width(260.dp)
                     .fillMaxHeight(),
-                drawerContainerColor = Color.White
+                drawerContainerColor = CoveSurface
             ) {
                 Column(
                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 28.dp)
                 ) {
-                    Text(
-                        text = "Collectors Cove",
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black
-                    )
+                    LogoMark()
 
                     Spacer(Modifier.height(24.dp))
 
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable(onClick = onViewProfileClick),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Text(
                             text = "JL",
                             modifier = Modifier
                                 .size(46.dp)
-                                .background(Color(0xFFE0E0E0), CircleShape)
+                                .background(CoveLightGray, CircleShape)
                                 .padding(top = 13.dp),
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
@@ -69,33 +78,42 @@ fun AppMenuDrawer(
                         Spacer(Modifier.width(12.dp))
 
                         Column {
-                            Text("John Lennon", fontSize = 15.sp, fontWeight = FontWeight.Bold)
-                            Text("View Profile", fontSize = 12.sp, color = Color.Gray)
+                            Text(
+                                "John Lennon",
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Black
+                            )
+                            Text(
+                                "View Profile",
+                                fontSize = 12.sp,
+                                color = CoveGold,
+                                fontWeight = FontWeight.Medium
+                            )
                         }
                     }
 
                     Spacer(Modifier.height(28.dp))
 
-                    listOf(
-                        "My Collection",
-                        "Wishlist",
-                        "Sell Item",
-                        "Notifications",
-                        "Settings",
-                        "Help Center"
-                    ).forEach { item ->
+                    listOf("My Collection", "Sell Item").forEach { item ->
                         DrawerMenuItem(
                             label = item,
-                            onClick = { scope.launch { drawerState.close() } }
+                            onClick = { onMenuItemClick(item) }
                         )
                     }
 
                     Spacer(Modifier.weight(1f))
 
+                    HorizontalDivider(color = CoveBorder)
+                    Spacer(Modifier.height(8.dp))
+
                     DrawerMenuItem(
                         label = "Log out",
                         isDestructive = true,
-                        onClick = { scope.launch { drawerState.close() } }
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            onLogoutClick()
+                        }
                     )
                 }
             }
@@ -118,6 +136,6 @@ private fun DrawerMenuItem(
             .padding(vertical = 14.dp),
         fontSize = 15.sp,
         fontWeight = FontWeight.Medium,
-        color = if (isDestructive) Color.Red else Color.Black
+        color = if (isDestructive) Color(0xFFC62828) else Color.Black
     )
 }

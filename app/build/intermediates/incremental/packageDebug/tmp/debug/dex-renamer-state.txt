@@ -1,11 +1,11 @@
-#Thu May 28 12:12:52 PST 2026
-base.0=C\:\\Users\\heath\\AndroidStudioProjects\\collecs\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes.dex
-base.1=C\:\\Users\\heath\\AndroidStudioProjects\\collecs\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\0\\classes.dex
-base.2=C\:\\Users\\heath\\AndroidStudioProjects\\collecs\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\5\\classes.dex
-base.3=C\:\\Users\\heath\\AndroidStudioProjects\\collecs\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\7\\classes.dex
-base.4=C\:\\Users\\heath\\AndroidStudioProjects\\collecs\\app\\build\\intermediates\\global_synthetics_dex\\debug\\generateDebugGlobalSynthetics\\classes.dex
-base.5=C\:\\Users\\heath\\AndroidStudioProjects\\collecs\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes2.dex
-base.6=C\:\\Users\\heath\\AndroidStudioProjects\\collecs\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes3.dex
+#Thu Jun 04 11:39:15 CST 2026
+base.0=C\:\\Users\\Red\\StudioProjects\\legit\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes.dex
+base.1=C\:\\Users\\Red\\StudioProjects\\legit\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\0\\classes.dex
+base.2=C\:\\Users\\Red\\StudioProjects\\legit\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\5\\classes.dex
+base.3=C\:\\Users\\Red\\StudioProjects\\legit\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\7\\classes.dex
+base.4=C\:\\Users\\Red\\StudioProjects\\legit\\app\\build\\intermediates\\global_synthetics_dex\\debug\\generateDebugGlobalSynthetics\\classes.dex
+base.5=C\:\\Users\\Red\\StudioProjects\\legit\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes2.dex
+base.6=C\:\\Users\\Red\\StudioProjects\\legit\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes3.dex
 path.0=classes.dex
 path.1=0/classes.dex
 path.2=5/classes.dex

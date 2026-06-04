@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.collectorscove.app-mergeDebugResources-43:/values-v30/values-v30.xml",
+            "outputFile": "com.example.collectorscove.app-mergeDebugResources-45:/values-v30/values-v30.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\heath\\.gradle\\caches\\9.4.1\\transforms\\e46d0fa241a902af9d26e1a0f1eae9a1\\transformed\\material3\\res\\values-v30\\values-v30.xml",
+                    "source": "C:\\Users\\Red\\.gradle\\caches\\9.4.1\\transforms\\e46d0fa241a902af9d26e1a0f1eae9a1\\transformed\\material3\\res\\values-v30\\values-v30.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",

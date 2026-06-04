@@ -52,12 +52,12 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
-private val GoldButton = Color(0xFFB8970A)
-private val TextPrimary = Color(0xFF1A1A1A)
-private val TextSecondary = Color(0xFF777777)
-private val DividerColor = Color(0xFFDDDDDD)
-private val CardBorder = Color(0xFFCCCCCC)
+import com.example.collectorscove.ui.theme.CoveBackground
+import com.example.collectorscove.ui.theme.CoveBorder
+import com.example.collectorscove.ui.theme.CoveGold
+import com.example.collectorscove.ui.theme.CoveLightGray
+import com.example.collectorscove.ui.theme.CoveSurface
+import com.example.collectorscove.ui.theme.CoveTextSecondary
 
 private enum class AccountPage {
     Settings,
@@ -68,13 +68,19 @@ private enum class AccountPage {
 }
 
 @Composable
-fun AccountSettingsApp() {
+fun AccountSettingsApp(
+    onMenuClick: () -> Unit = {},
+    onNotificationsClick: () -> Unit = {},
+    onLogout: () -> Unit = {}
+) {
     var page by remember { mutableStateOf(AccountPage.Settings) }
 
     when (page) {
         AccountPage.Settings -> {
             AccountSettingsScreen(
-                onMenuClick = { /* Handled globally */ },
+                onMenuClick = onMenuClick,
+                onNotificationsClick = onNotificationsClick,
+                onLogout = onLogout,
                 onChangePassword = { page = AccountPage.ChangePassword },
                 onBankCards = { page = AccountPage.BankCards },
                 onPrivacySettings = { page = AccountPage.PrivacySettings },
@@ -103,6 +109,8 @@ fun AccountSettingsApp() {
 @Composable
 private fun AccountSettingsScreen(
     onMenuClick: () -> Unit,
+    onNotificationsClick: () -> Unit,
+    onLogout: () -> Unit,
     onChangePassword: () -> Unit,
     onBankCards: () -> Unit,
     onPrivacySettings: () -> Unit,
@@ -111,36 +119,33 @@ private fun AccountSettingsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(CoveBackground)
             .padding(horizontal = 16.dp)
             .verticalScroll(rememberScrollState())
     ) {
+        Spacer(Modifier.height(24.dp))
+
+        AppTopBar(
+            onMenuClick = onMenuClick,
+            onNotificationsClick = onNotificationsClick
+        )
+
         Spacer(Modifier.height(16.dp))
 
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = "☰",
-                modifier = Modifier.clickable(onClick = onMenuClick),
-                fontSize = 28.sp,
-                color = TextPrimary
-            )
-
-            Spacer(Modifier.width(12.dp))
-
-            Text(
-                text = "Account Settings",
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextPrimary
-            )
-        }
+        Text(
+            text = "Account Settings",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.Black
+        )
 
         Spacer(Modifier.height(16.dp))
 
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(2.dp)
+            colors = CardDefaults.cardColors(containerColor = CoveSurface),
+            border = BorderStroke(1.dp, CoveBorder)
         ) {
             Row(
                 modifier = Modifier
@@ -151,7 +156,7 @@ private fun AccountSettingsScreen(
                 Box(
                     modifier = Modifier
                         .size(52.dp)
-                        .background(Color(0xFFDDDDDD), CircleShape),
+                        .background(CoveLightGray, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Text("👤", fontSize = 26.sp)
@@ -160,8 +165,8 @@ private fun AccountSettingsScreen(
                 Spacer(Modifier.width(12.dp))
 
                 Column {
-                    Text("John Lennon", fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
-                    Text("View Profile", fontSize = 12.sp, color = TextSecondary)
+                    Text("John Lennon", fontWeight = FontWeight.SemiBold, fontSize = 16.sp, color = Color.Black)
+                    Text("View Profile", fontSize = 12.sp, color = CoveGold, fontWeight = FontWeight.Medium)
                 }
             }
         }
@@ -179,7 +184,7 @@ private fun AccountSettingsScreen(
         SectionLabel("Settings")
         Spacer(Modifier.height(4.dp))
 
-        HorizontalDivider(color = DividerColor)
+        HorizontalDivider(color = CoveBorder)
         SettingsRow("Change Password", onChangePassword)
         SettingsRow("Bank Account / Cards", onBankCards)
         SettingsRow("Privacy Settings", onPrivacySettings)
@@ -188,13 +193,13 @@ private fun AccountSettingsScreen(
         Spacer(Modifier.height(24.dp))
 
         OutlinedButton(
-            onClick = {},
+            onClick = onLogout,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp),
             shape = RoundedCornerShape(8.dp),
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary),
-            border = BorderStroke(1.dp, CardBorder)
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Black),
+            border = BorderStroke(1.dp, CoveBorder)
         ) {
             Text("Logout", fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
         }
@@ -213,16 +218,17 @@ private fun ChangePasswordScreen(onBack: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(CoveBackground)
             .padding(horizontal = 16.dp)
     ) {
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(24.dp))
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = "‹",
                 modifier = Modifier.clickable(onClick = onBack),
                 fontSize = 40.sp,
-                color = TextPrimary
+                color = Color.Black
             )
             Spacer(Modifier.width(4.dp))
             Text("Change Password", fontSize = 20.sp, fontWeight = FontWeight.Bold)
@@ -261,7 +267,7 @@ private fun ChangePasswordScreen(onBack: () -> Unit) {
         Text(
             text = "Password should contain letters, numbers, and special characters",
             fontSize = 12.sp,
-            color = TextSecondary,
+            color = CoveTextSecondary,
             lineHeight = 18.sp
         )
 
@@ -273,9 +279,9 @@ private fun ChangePasswordScreen(onBack: () -> Unit) {
                 .fillMaxWidth()
                 .height(50.dp),
             shape = RoundedCornerShape(8.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = GoldButton)
+            colors = ButtonDefaults.buttonColors(containerColor = CoveGold)
         ) {
-            Text("CHANGE PASSWORD", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Color.White)
+            Text("CHANGE PASSWORD", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = CoveSurface)
         }
     }
 }
@@ -287,16 +293,17 @@ private fun BankCardsScreen(onBack: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(CoveBackground)
             .padding(horizontal = 16.dp)
     ) {
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(24.dp))
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = "‹",
                 modifier = Modifier.clickable(onClick = onBack),
                 fontSize = 40.sp,
-                color = TextPrimary
+                color = Color.Black
             )
             Spacer(Modifier.width(4.dp))
             Text("Bank Account & Cards", fontSize = 20.sp, fontWeight = FontWeight.Bold)
@@ -311,7 +318,7 @@ private fun BankCardsScreen(onBack: () -> Unit) {
                 .fillMaxWidth()
                 .clickable { showAddDialog = true },
             shape = RoundedCornerShape(10.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
+            colors = CardDefaults.cardColors(containerColor = CoveSurface),
             elevation = CardDefaults.cardElevation(1.dp)
         ) {
             Box(
@@ -348,6 +355,7 @@ private fun PrivacySettingsScreen(onBack: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(CoveBackground)
             .padding(horizontal = 24.dp)
     ) {
         Spacer(Modifier.height(18.dp))
@@ -360,7 +368,7 @@ private fun PrivacySettingsScreen(onBack: () -> Unit) {
             text = "Set who can message you",
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
-            color = TextPrimary
+            color = Color.Black
         )
 
         Spacer(Modifier.height(18.dp))
@@ -383,7 +391,7 @@ private fun PrivacySettingsScreen(onBack: () -> Unit) {
             text = "App Permissions",
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
-            color = TextPrimary
+            color = Color.Black
         )
 
         Spacer(Modifier.height(12.dp))
@@ -421,7 +429,7 @@ private fun PrivacySettingsScreen(onBack: () -> Unit) {
             Text(
                 text = "Delete",
                 fontSize = 11.sp,
-                color = TextPrimary
+                color = Color.Black
             )
         }
     }
@@ -434,6 +442,7 @@ private fun PaymentHistoryScreen(onBack: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(CoveBackground)
             .padding(horizontal = 24.dp)
     ) {
         Spacer(Modifier.height(18.dp))
@@ -446,7 +455,7 @@ private fun PaymentHistoryScreen(onBack: () -> Unit) {
                 text = "<",
                 modifier = Modifier.clickable(onClick = onBack),
                 fontSize = 34.sp,
-                color = TextPrimary
+                color = Color.Black
             )
 
             Spacer(Modifier.width(6.dp))
@@ -455,7 +464,7 @@ private fun PaymentHistoryScreen(onBack: () -> Unit) {
                 text = "Payments",
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
-                color = TextPrimary
+                color = Color.Black
             )
 
             Spacer(Modifier.weight(1f))
@@ -464,7 +473,7 @@ private fun PaymentHistoryScreen(onBack: () -> Unit) {
                 text = "Clear History",
                 modifier = Modifier.clickable { hasHistory = false },
                 fontSize = 11.sp,
-                color = TextSecondary
+                color = CoveTextSecondary
             )
         }
 
@@ -483,7 +492,7 @@ private fun PaymentHistoryScreen(onBack: () -> Unit) {
                 Text(
                     text = "No Recent History",
                     fontSize = 13.sp,
-                    color = TextSecondary
+                    color = CoveTextSecondary
                 )
             }
         }
@@ -497,7 +506,7 @@ private fun AccountHeader(title: String, onBack: () -> Unit) {
             text = "<",
             modifier = Modifier.clickable(onClick = onBack),
             fontSize = 34.sp,
-            color = TextPrimary
+            color = Color.Black
         )
 
         Spacer(Modifier.width(6.dp))
@@ -506,7 +515,7 @@ private fun AccountHeader(title: String, onBack: () -> Unit) {
             text = title,
             fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
-            color = TextPrimary
+            color = Color.Black
         )
     }
 }
@@ -520,8 +529,8 @@ private fun PrivacyRadioRow(label: String, selected: Boolean, onClick: () -> Uni
             .clickable(onClick = onClick),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        RadioButton(selected = selected, onClick = onClick)
-        Text(label, fontSize = 12.sp, color = TextPrimary)
+        RadioButton(selected = selected, onClick = onClick, colors = androidx.compose.material3.RadioButtonDefaults.colors(selectedColor = CoveGold))
+        Text(label, fontSize = 12.sp, color = Color.Black)
     }
 }
 
@@ -541,7 +550,7 @@ private fun PermissionRow(
             text = label,
             modifier = Modifier.weight(1f),
             fontSize = 11.sp,
-            color = TextPrimary
+            color = Color.Black
         )
 
         Switch(
@@ -559,8 +568,8 @@ private fun PaymentHistoryCard() {
             .fillMaxWidth()
             .height(70.dp),
         shape = RoundedCornerShape(3.dp),
-        border = BorderStroke(1.dp, DividerColor),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        border = BorderStroke(1.dp, CoveBorder),
+        colors = CardDefaults.cardColors(containerColor = CoveSurface)
     ) {
         Row(
             modifier = Modifier
@@ -576,7 +585,7 @@ private fun PaymentHistoryCard() {
                     .border(1.dp, Color.LightGray),
                 contentAlignment = Alignment.Center
             ) {
-                Text("Card", fontSize = 5.sp, color = GoldButton)
+                Text("Card", fontSize = 5.sp, color = CoveGold)
             }
 
             Spacer(Modifier.width(14.dp))
@@ -586,12 +595,12 @@ private fun PaymentHistoryCard() {
                     text = "Bid Won!",
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
-                    color = TextPrimary
+                    color = Color.Black
                 )
                 Text(
                     text = "An amount of P5,731.63 has been\ndeducted to your account",
                     fontSize = 10.sp,
-                    color = TextPrimary,
+                    color = Color.Black,
                     lineHeight = 11.sp
                 )
             }
@@ -599,7 +608,7 @@ private fun PaymentHistoryCard() {
             Text(
                 text = "05/11/2025",
                 fontSize = 9.sp,
-                color = TextPrimary
+                color = Color.Black
             )
         }
     }
@@ -610,7 +619,7 @@ private fun SectionLabel(text: String) {
     Text(
         text = text,
         fontSize = 13.sp,
-        color = TextSecondary,
+        color = CoveTextSecondary,
         fontWeight = FontWeight.Medium
     )
 }
@@ -625,9 +634,9 @@ private fun InfoRow(label: String, value: String) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(label, fontSize = 15.sp, fontWeight = FontWeight.Medium)
-        Text("$value  ›", fontSize = 14.sp, color = TextSecondary)
+        Text("$value  ›", fontSize = 14.sp, color = CoveTextSecondary)
     }
-    HorizontalDivider(color = DividerColor)
+    HorizontalDivider(color = CoveBorder)
 }
 
 @Composable
@@ -640,10 +649,10 @@ private fun SettingsRow(label: String, onClick: () -> Unit) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(label, fontSize = 15.sp, color = TextPrimary)
-        Text("›", fontSize = 22.sp, color = TextSecondary)
+        Text(label, fontSize = 15.sp, color = Color.Black)
+        Text("›", fontSize = 22.sp, color = CoveTextSecondary)
     }
-    HorizontalDivider(color = DividerColor)
+    HorizontalDivider(color = CoveBorder)
 }
 
 @Composable
@@ -657,7 +666,7 @@ private fun PasswordField(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        placeholder = { Text(placeholder, color = TextSecondary, fontSize = 14.sp) },
+        placeholder = { Text(placeholder, color = CoveTextSecondary, fontSize = 14.sp) },
         singleLine = true,
         visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -666,16 +675,16 @@ private fun PasswordField(
                 text = if (showPassword) "Hide" else "Show",
                 modifier = Modifier.clickable(onClick = onToggleVisibility),
                 fontSize = 12.sp,
-                color = TextSecondary
+                color = CoveTextSecondary
             )
         },
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = GoldButton,
-            unfocusedBorderColor = CardBorder,
-            focusedContainerColor = Color.White,
-            unfocusedContainerColor = Color.White
+            focusedBorderColor = CoveGold,
+            unfocusedBorderColor = CoveBorder,
+            focusedContainerColor = CoveSurface,
+            unfocusedContainerColor = CoveSurface
         )
     )
 }
@@ -685,7 +694,7 @@ private fun CardItem(holderName: String, maskedNumber: String) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = CoveSurface),
         elevation = CardDefaults.cardElevation(1.dp)
     ) {
         Row(
@@ -697,17 +706,17 @@ private fun CardItem(holderName: String, maskedNumber: String) {
             Box(
                 modifier = Modifier
                     .size(36.dp)
-                    .background(TextPrimary, RoundedCornerShape(4.dp)),
+                    .background(Color.Black, RoundedCornerShape(4.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Text("Card", fontSize = 9.sp, color = Color.White)
+                Text("Card", fontSize = 9.sp, color = CoveSurface)
             }
 
             Spacer(Modifier.width(12.dp))
 
             Column {
                 Text(holderName, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
-                Text(maskedNumber, fontSize = 12.sp, color = TextSecondary)
+                Text(maskedNumber, fontSize = 12.sp, color = CoveTextSecondary)
             }
         }
     }
