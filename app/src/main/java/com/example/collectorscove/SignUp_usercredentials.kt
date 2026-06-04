@@ -20,7 +20,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun SignUpCredentialsScreen() {
+fun SignUpCredentialsScreen(
+    onNext: (String, String) -> Unit
+) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
@@ -102,7 +104,10 @@ fun SignUpCredentialsScreen() {
             Spacer(modifier = Modifier.height(44.dp))
 
             Button(
-                onClick = { },
+                onClick = {
+                    if (password == confirmPassword && email.isNotEmpty()) {
+                    onNext(email, password)
+                }},
                 modifier = Modifier
                     .align(Alignment.End)
                     .width(96.dp)

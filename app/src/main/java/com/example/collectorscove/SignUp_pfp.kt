@@ -18,7 +18,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun SignUpNameScreen() {
+fun SignUpNameScreen(
+    onNext: (String, String, String) -> Unit
+) {
     var firstName by remember { mutableStateOf("") }
     var middleName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
@@ -98,7 +100,7 @@ fun SignUpNameScreen() {
             Spacer(modifier = Modifier.height(88.dp))
 
             Button(
-                onClick = { },
+                onClick = { onNext(firstName, middleName, lastName)},
                 modifier = Modifier
                     .align(Alignment.End)
                     .width(90.dp)

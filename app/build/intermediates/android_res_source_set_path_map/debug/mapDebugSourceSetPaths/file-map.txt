@@ -1,8 +1,9 @@
-com.example.collectorscove.app-pngs-0 C:\Users\Red\StudioProjects\legit\app\build\generated\res\pngs\debug
-com.example.collectorscove.app-updated_navigation_xml-1 C:\Users\Red\StudioProjects\legit\app\build\generated\updated_navigation_xml\debug
-com.example.collectorscove.app-packageDebugResources-2 C:\Users\Red\StudioProjects\legit\app\build\intermediates\incremental\debug\packageDebugResources\merged.dir
-com.example.collectorscove.app-packageDebugResources-3 C:\Users\Red\StudioProjects\legit\app\build\intermediates\incremental\debug\packageDebugResources\stripped.dir
-com.example.collectorscove.app-debug-4 C:\Users\Red\StudioProjects\legit\app\build\intermediates\merged_res\debug\mergeDebugResources
-com.example.collectorscove.app-debug-5 C:\Users\Red\StudioProjects\legit\app\src\debug\res
-com.example.collectorscove.app-main-6 C:\Users\Red\StudioProjects\legit\app\src\main\res
-gradleHome-0 C:\Users\Red\.gradle
+com.example.collectorscove.app-pngs-0 C:\Users\User\StudioProjects\collecs\app\build\generated\res\pngs\debug
+com.example.collectorscove.app-res-1 C:\Users\User\StudioProjects\collecs\app\build\generated\res\processDebugGoogleServices
+com.example.collectorscove.app-updated_navigation_xml-2 C:\Users\User\StudioProjects\collecs\app\build\generated\updated_navigation_xml\debug
+com.example.collectorscove.app-packageDebugResources-3 C:\Users\User\StudioProjects\collecs\app\build\intermediates\incremental\debug\packageDebugResources\merged.dir
+com.example.collectorscove.app-packageDebugResources-4 C:\Users\User\StudioProjects\collecs\app\build\intermediates\incremental\debug\packageDebugResources\stripped.dir
+com.example.collectorscove.app-debug-5 C:\Users\User\StudioProjects\collecs\app\build\intermediates\merged_res\debug\mergeDebugResources
+com.example.collectorscove.app-debug-6 C:\Users\User\StudioProjects\collecs\app\src\debug\res
+com.example.collectorscove.app-main-7 C:\Users\User\StudioProjects\collecs\app\src\main\res
+gradleHome-0 C:\Users\User\.gradle

@@ -7,7 +7,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -26,6 +29,9 @@ sealed class Screen(val route: String) {
     object Account : Screen("account")
     object SellItem : Screen("sell_item")
     object MyCollection : Screen("my_collection")
+    object SignUpCredentials : Screen("signup_credentials")
+    object SignUpName : Screen("signup_name")
+    object SignUpProfile : Screen("signup_profile")
 }
 
 @Composable
@@ -33,6 +39,12 @@ fun AppNavigation() {
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+
+    // Shared signup state
+    var signupEmail by remember { mutableStateOf("") }
+    var signupPassword by remember { mutableStateOf("") }
+    var signupFirstName by remember { mutableStateOf("") }
+    var signupLastName by remember { mutableStateOf("") }
 
     val openMenu: () -> Unit = {
         scope.launch { drawerState.open() }
@@ -81,6 +93,43 @@ fun AppNavigation() {
                     composable(Screen.Login.route) {
                         LoginScreen(
                             onSignIn = {
+                                navController.navigate(Screen.Home.route) {
+                                    popUpTo(Screen.Login.route) { inclusive = true }
+                                }
+                            },
+                            onGoToSignup = {
+                                navController.navigate(Screen.SignUpCredentials.route)
+                            }
+                        )
+                    }
+
+                    composable(Screen.SignUpCredentials.route) {
+                        SignUpCredentialsScreen(
+                            onNext = { email, password ->
+                                signupEmail = email
+                                signupPassword = password
+                                navController.navigate(Screen.SignUpName.route)
+                            }
+                        )
+                    }
+
+                    composable(Screen.SignUpName.route) {
+                        SignUpNameScreen(
+                            onNext = { first, middle, last ->
+                                signupFirstName = first
+                                signupLastName = last
+                                navController.navigate(Screen.SignUpProfile.route)
+                            }
+                        )
+                    }
+
+                    composable(Screen.SignUpProfile.route) {
+                        SignUpProfileScreen(
+                            email = signupEmail,
+                            password = signupPassword,
+                            firstName = signupFirstName,
+                            lastName = signupLastName,
+                            onFinish = {
                                 navController.navigate(Screen.Home.route) {
                                     popUpTo(Screen.Login.route) { inclusive = true }
                                 }

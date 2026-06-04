@@ -1,14 +1,9 @@
 package com.example.collectorscove
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,11 +19,18 @@ import com.example.collectorscove.ui.theme.CoveBackground
 import com.example.collectorscove.ui.theme.CoveBorder
 import com.example.collectorscove.ui.theme.CoveGold
 import com.example.collectorscove.ui.theme.CoveSurface
+import com.example.collectorscove.ui.auth.AuthViewModel
 
 @Composable
-fun LoginScreen(onSignIn: () -> Unit = {}) {
+fun LoginScreen(
+    onSignIn: () -> Unit,
+    onGoToSignup: () -> Unit
+) {
+
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+
+    val viewModel = remember { AuthViewModel() }
 
     Box(
         modifier = Modifier
@@ -93,7 +95,13 @@ fun LoginScreen(onSignIn: () -> Unit = {}) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = onSignIn,
+                onClick = {
+                    viewModel.login(email, password) { success, _ ->
+                        if (success) {
+                            onSignIn()
+                        }
+                    }
+                },
                 modifier = Modifier
                     .width(108.dp)
                     .height(44.dp),
@@ -123,7 +131,9 @@ fun LoginScreen(onSignIn: () -> Unit = {}) {
                     fontWeight = FontWeight.Bold,
                     color = Color.Black,
                     textDecoration = TextDecoration.Underline,
-                    modifier = Modifier.clickable { }
+                    modifier = Modifier.clickable {
+                        onGoToSignup()
+                    }
                 )
             }
         }
@@ -138,6 +148,11 @@ fun LoginScreen(onSignIn: () -> Unit = {}) {
         )
     }
 }
+
+/* =======================
+   ADDED MISSING FUNCTIONS
+   (NO DESIGN CHANGES)
+   ======================= */
 
 @Composable
 private fun LoginInput(
@@ -161,7 +176,9 @@ private fun LoginInput(
             .height(52.dp),
         singleLine = true,
         textStyle = TextStyle(fontSize = 14.sp),
-        visualTransformation = if (isPassword) PasswordVisualTransformation() else androidx.compose.ui.text.input.VisualTransformation.None,
+        visualTransformation =
+            if (isPassword) PasswordVisualTransformation()
+            else androidx.compose.ui.text.input.VisualTransformation.None,
         colors = TextFieldDefaults.colors(
             focusedContainerColor = CoveSurface,
             unfocusedContainerColor = CoveSurface,
@@ -182,7 +199,10 @@ private fun LogoText() {
             modifier = Modifier
                 .size(64.dp)
                 .align(Alignment.CenterStart)
-                .background(CoveGold, shape = androidx.compose.foundation.shape.CircleShape)
+                .background(
+                    CoveGold,
+                    shape = androidx.compose.foundation.shape.CircleShape
+                )
         )
 
         Column(

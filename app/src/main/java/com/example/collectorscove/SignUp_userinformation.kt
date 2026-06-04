@@ -18,9 +18,17 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.collectorscove.ui.auth.AuthViewModel
 
 @Composable
-fun SignUpProfileScreen() {
+fun SignUpProfileScreen(
+    email: String,
+    password: String,
+    firstName: String,
+    lastName: String,
+    onFinish: () -> Unit
+) {
+    val viewModel = remember { AuthViewModel() }
     var phoneNumber by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
     var nationality by remember { mutableStateOf("") }
@@ -111,15 +119,25 @@ fun SignUpProfileScreen() {
             Spacer(modifier = Modifier.height(44.dp))
 
             Button(
-                onClick = { },
-                modifier = Modifier
-                    .align(Alignment.End)
-                    .width(90.dp)
-                    .height(46.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF171310),
-                    contentColor = Color.White
-                )
+                onClick = {
+
+                    viewModel.register(
+                        email = email,
+                        password = password,
+                        firstName = firstName,
+                        lastName = lastName,
+                        phoneNumber = phoneNumber,
+                        address = address,
+                        nationality = nationality,
+                        gender = gender
+                    ) { success, error ->
+
+                        if (success) {
+                            onFinish()
+                        }
+                    }
+
+                }
             ) {
                 Text(
                     text = "Next",
