@@ -13,6 +13,10 @@ class AuthRepository {
         password: String,
         firstName: String,
         lastName: String,
+        phoneNumber: String = "",
+        address: String = "",
+        nationality: String = "",
+        gender: String = "",
         onResult: (Boolean, String?) -> Unit
     ) {
         auth.createUserWithEmailAndPassword(email, password)
@@ -24,7 +28,11 @@ class AuthRepository {
                     uid = uid,
                     email = email,
                     firstName = firstName,
-                    lastName = lastName
+                    lastName = lastName,
+                    phoneNumber = phoneNumber,
+                    address = address,
+                    nationality = nationality,
+                    gender = gender
                 )
 
                 firestore.collection("users")
@@ -37,8 +45,13 @@ class AuthRepository {
                         onResult(false, it.message)
                     }
             }
-            .addOnFailureListener {
-                onResult(false, it.message)
+            .addOnFailureListener { e ->
+                val errorMessage = if (e.message?.contains("already in use") == true) {
+                    "This email is already registered in Firebase Authentication. Please delete it from the 'Authentication' tab in the Firebase Console if you want to start fresh."
+                } else {
+                    e.message
+                }
+                onResult(false, errorMessage)
             }
     }
 
@@ -51,8 +64,26 @@ class AuthRepository {
             .addOnSuccessListener {
                 onResult(true, null)
             }
+            .addOnFailureListener { e ->
+                val errorMessage = if (e.message?.contains("already in use") == true) {
+                    "This email is already registered in Firebase Authentication. Please delete it from the 'Authentication' tab in the Firebase Console if you want to start fresh."
+                } else {
+                    e.message
+                }
+                onResult(false, errorMessage)
+            }
+    }
+
+    fun getUserProfile(uid: String, onResult: (User?) -> Unit) {
+        firestore.collection("users")
+            .document(uid)
+            .get()
+            .addOnSuccessListener { document ->
+                val user = document.toObject(User::class.java)
+                onResult(user)
+            }
             .addOnFailureListener {
-                onResult(false, it.message)
+                onResult(null)
             }
     }
 

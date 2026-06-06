@@ -25,6 +25,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.layout.Box
+import androidx.compose.runtime.getValue
+import com.example.collectorscove.ui.auth.AuthViewModel
 import com.example.collectorscove.ui.theme.CoveBorder
 import com.example.collectorscove.ui.theme.CoveGold
 import com.example.collectorscove.ui.theme.CoveLightGray
@@ -35,15 +38,19 @@ import kotlinx.coroutines.launch
 @Composable
 fun AppMenuDrawer(
     drawerState: DrawerState,
+    viewModel: AuthViewModel,
+    enabled: Boolean = true,
     onMenuItemClick: (String) -> Unit = {},
     onViewProfileClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {},
     content: @Composable () -> Unit
 ) {
     val scope = rememberCoroutineScope()
+    val user by viewModel.currentUser
 
     ModalNavigationDrawer(
         drawerState = drawerState,
+        gesturesEnabled = enabled,
         drawerContent = {
             ModalDrawerSheet(
                 modifier = Modifier
@@ -64,22 +71,29 @@ fun AppMenuDrawer(
                             .clickable(onClick = onViewProfileClick),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = "JL",
+                        val initials = if (user != null) {
+                            "${user!!.firstName.take(1)}${user!!.lastName.take(1)}"
+                        } else "JL"
+
+                        Box(
                             modifier = Modifier
                                 .size(46.dp)
-                                .background(CoveLightGray, CircleShape)
-                                .padding(top = 13.dp),
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.Black
-                        )
+                                .background(CoveLightGray, CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = initials,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Black
+                            )
+                        }
 
                         Spacer(Modifier.width(12.dp))
 
                         Column {
                             Text(
-                                "John Lennon",
+                                text = if (user != null) "${user!!.firstName} ${user!!.lastName}" else "Loading...",
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.Black

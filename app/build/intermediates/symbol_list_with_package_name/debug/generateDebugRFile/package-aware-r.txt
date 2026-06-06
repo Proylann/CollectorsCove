@@ -1,4 +1,4 @@
-com.example.collectorscove
+com.app.Collectors.Cove
 color black
 color purple_200
 color purple_500

@@ -1,13 +1,29 @@
 package com.example.collectorscove.ui.auth
 
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import com.example.collectorscove.data.firebase.FirebaseManager
 import com.example.collectorscove.data.model.User
+import com.example.collectorscove.data.repository.AuthRepository
 
 class AuthViewModel : ViewModel() {
 
-    private val auth = FirebaseManager.auth
-    private val firestore = FirebaseManager.firestore
+    private val authRepository = AuthRepository()
+
+    private val _currentUser = mutableStateOf<User?>(null)
+    val currentUser: State<User?> = _currentUser
+
+    init {
+        authRepository.getCurrentUser()?.let { firebaseUser ->
+            fetchUserProfile(firebaseUser.uid)
+        }
+    }
+
+    fun fetchUserProfile(uid: String) {
+        authRepository.getUserProfile(uid) { user ->
+            _currentUser.value = user
+        }
+    }
 
     fun register(
         email: String,
@@ -20,36 +36,25 @@ class AuthViewModel : ViewModel() {
         gender: String,
         onResult: (Boolean, String?) -> Unit
     ) {
-
-        auth.createUserWithEmailAndPassword(email, password)
-            .addOnSuccessListener { result ->
-
-                val uid = result.user?.uid ?: return@addOnSuccessListener
-
-                val user = User(
-                    uid = uid,
-                    email = email,
-                    firstName = firstName,
-                    lastName = lastName,
-                    phoneNumber = phoneNumber,
-                    address = address,
-                    nationality = nationality,
-                    gender = gender
-                )
-
-                firestore.collection("users")
-                    .document(uid)
-                    .set(user)
-                    .addOnSuccessListener {
-                        onResult(true, null)
-                    }
-                    .addOnFailureListener {
-                        onResult(false, it.message)
-                    }
+        authRepository.registerUser(
+            email,
+            password,
+            firstName,
+            lastName,
+            phoneNumber,
+            address,
+            nationality,
+            gender
+        ) { success, error ->
+            if (success) {
+                authRepository.getCurrentUser()?.let { firebaseUser ->
+                    fetchUserProfile(firebaseUser.uid)
+                }
+                onResult(true, null)
+            } else {
+                onResult(false, error)
             }
-            .addOnFailureListener {
-                onResult(false, it.message)
-            }
+        }
     }
 
     fun login(
@@ -57,12 +62,20 @@ class AuthViewModel : ViewModel() {
         password: String,
         onResult: (Boolean, String?) -> Unit
     ) {
-        auth.signInWithEmailAndPassword(email, password)
-            .addOnSuccessListener {
+        authRepository.loginUser(email, password) { success, error ->
+            if (success) {
+                authRepository.getCurrentUser()?.let { firebaseUser ->
+                    fetchUserProfile(firebaseUser.uid)
+                }
                 onResult(true, null)
+            } else {
+                onResult(false, error)
             }
-            .addOnFailureListener {
-                onResult(false, it.message)
-            }
+        }
+    }
+
+    fun logout() {
+        authRepository.logout()
+        _currentUser.value = null
     }
 }

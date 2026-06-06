@@ -254,11 +254,11 @@
     <string name="fallback_menu_item_copy_link">Copy link</string>
     <string name="fallback_menu_item_open_in_browser">Open in browser</string>
     <string name="fallback_menu_item_share_link">Share link</string>
-    <string name="gcm_defaultSenderId" translatable="false">792851490250</string>
-    <string name="google_api_key" translatable="false">AIzaSyA_6LeDPjxtLcewfh5E9ADAM69VExmZdRw</string>
-    <string name="google_app_id" translatable="false">1:792851490250:android:4e8f5f8ffc3bfff8ee9b33</string>
-    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyA_6LeDPjxtLcewfh5E9ADAM69VExmZdRw</string>
-    <string name="google_storage_bucket" translatable="false">collectors-cove.firebasestorage.app</string>
+    <string name="gcm_defaultSenderId" translatable="false">1038885305103</string>
+    <string name="google_api_key" translatable="false">AIzaSyBUGOGqHrtJ5nhv67dZV1aIYyJgQajFWcE</string>
+    <string name="google_app_id" translatable="false">1:1038885305103:android:0546bd2b06f518cf92dc7a</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyBUGOGqHrtJ5nhv67dZV1aIYyJgQajFWcE</string>
+    <string name="google_storage_bucket" translatable="false">collectors-cove-4cdf6.firebasestorage.app</string>
     <string name="in_progress">In progress</string>
     <string name="indeterminate">Partially checked</string>
     <string name="m3c_bottom_sheet_collapse_description">Collapse bottom sheet</string>
@@ -334,7 +334,7 @@
     <string name="mc2_snackbar_pane_title">Alert</string>
     <string name="navigation_menu">"Navigation menu"</string>
     <string name="not_selected">Not selected</string>
-    <string name="project_id" translatable="false">collectors-cove</string>
+    <string name="project_id" translatable="false">collectors-cove-4cdf6</string>
     <string name="range_end">"Range end"</string>
     <string name="range_start">"Range start"</string>
     <string name="selected">Selected</string>

@@ -1,42 +1,29 @@
 package com.example.collectorscove
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.collectorscove.ui.theme.CoveBackground
+import coil.compose.AsyncImage
+import com.example.collectorscove.data.model.CollectibleItem
 import com.example.collectorscove.ui.theme.CoveBorder
 import com.example.collectorscove.ui.theme.CoveGold
 import com.example.collectorscove.ui.theme.CoveLightGray
 import com.example.collectorscove.ui.theme.CoveSurface
-import com.example.collectorscove.ui.theme.CoveTextSecondary
+import java.util.Locale
 
 @Composable
 fun AppTopBar(
@@ -145,100 +132,128 @@ fun SectionHeader(
 }
 
 @Composable
-fun ProductGrid(
-    items: List<CollectibleItem>,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+fun ItemCard(item: CollectibleItem, onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = CoveSurface)
     ) {
-        items.chunked(2).forEach { rowItems ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+        Column(modifier = Modifier.padding(12.dp)) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(120.dp)
+                    .background(Color.LightGray, RoundedCornerShape(8.dp)),
+                contentAlignment = Alignment.Center
             ) {
-                rowItems.forEach { item ->
-                    CollectibleProductCard(
-                        item = item,
-                        modifier = Modifier.weight(1f)
+                if (item.imageUrl.isNotEmpty()) {
+                    AsyncImage(
+                        model = item.imageUrl,
+                        contentDescription = item.name,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop,
+                        error = androidx.compose.ui.graphics.painter.ColorPainter(Color.LightGray),
+                        placeholder = androidx.compose.ui.graphics.painter.ColorPainter(Color.LightGray)
                     )
-                }
-
-                if (rowItems.size == 1) {
-                    Spacer(modifier = Modifier.weight(1f))
+                } else {
+                    Text(item.category, color = Color.DarkGray)
                 }
             }
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = item.name,
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp,
+                maxLines = 1
+            )
+            Text(
+                text = "P${String.format(Locale.getDefault(), "%,.2f", item.price)}",
+                color = CoveGold,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold
+            )
         }
     }
 }
 
 @Composable
-fun CollectibleProductCard(
+fun ItemDetailDialog(
     item: CollectibleItem,
-    modifier: Modifier = Modifier
+    currentUserUid: String?,
+    onDismiss: () -> Unit,
+    onOrder: () -> Unit
 ) {
-    Card(
-        modifier = modifier.height(178.dp),
-        shape = RoundedCornerShape(12.dp),
-        border = BorderStroke(1.dp, CoveBorder),
-        colors = CardDefaults.cardColors(containerColor = CoveSurface)
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(104.dp)
-                    .background(item.imageColor),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = item.imageLabel,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.DarkGray
-                )
+    var isOrdering by remember { mutableStateOf(false) }
 
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            if (currentUserUid != null && currentUserUid != item.sellerId) {
+                Button(
+                    onClick = {
+                        isOrdering = true
+                        onOrder()
+                    },
+                    enabled = !isOrdering
+                ) {
+                    if (isOrdering) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            color = Color.White,
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text("Order Now")
+                    }
+                }
+            } else if (currentUserUid == item.sellerId) {
                 Text(
-                    text = "Heart",
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(8.dp),
-                    fontSize = 10.sp,
-                    color = Color.Black
+                    text = "You own this item",
+                    modifier = Modifier.padding(8.dp),
+                    color = Color.Gray,
+                    fontSize = 12.sp
                 )
             }
-
-            Column(
-                modifier = Modifier.padding(8.dp)
-            ) {
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss, enabled = !isOrdering) {
+                Text("Cancel")
+            }
+        },
+        title = { Text(item.name) },
+        text = {
+            Column {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .background(Color.LightGray, RoundedCornerShape(8.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (item.imageUrl.isNotEmpty()) {
+                        AsyncImage(
+                            model = item.imageUrl,
+                            contentDescription = item.name,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop,
+                            error = androidx.compose.ui.graphics.painter.ColorPainter(Color.LightGray),
+                            placeholder = androidx.compose.ui.graphics.painter.ColorPainter(Color.LightGray)
+                        )
+                    } else {
+                        Text("No Image", color = Color.DarkGray)
+                    }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("Category: ${item.category}", fontWeight = FontWeight.SemiBold)
                 Text(
-                    text = item.name,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color.Black,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    text = "Price: P${String.format(Locale.getDefault(), "%,.2f", item.price)}",
+                    color = CoveGold
                 )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = item.price,
-                    fontSize = 12.sp,
-                    color = CoveGold,
-                    fontWeight = FontWeight.Bold
-                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(item.description)
             }
         }
-    }
+    )
 }
-
-data class CollectibleItem(
-    val imageLabel: String,
-    val name: String,
-    val price: String,
-    val imageColor: Color
-)

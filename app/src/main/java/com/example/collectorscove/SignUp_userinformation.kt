@@ -18,17 +18,19 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material3.CircularProgressIndicator
+import com.example.collectorscove.ui.theme.CoveGold
 import com.example.collectorscove.ui.auth.AuthViewModel
 
 @Composable
 fun SignUpProfileScreen(
+    viewModel: AuthViewModel,
     email: String,
     password: String,
     firstName: String,
     lastName: String,
     onFinish: () -> Unit
 ) {
-    val viewModel = remember { AuthViewModel() }
     var phoneNumber by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
     var nationality by remember { mutableStateOf("") }
@@ -118,9 +120,34 @@ fun SignUpProfileScreen(
 
             Spacer(modifier = Modifier.height(44.dp))
 
-            Button(
-                onClick = {
+            var isLoading by remember { mutableStateOf(false) }
+            var errorMessage by remember { mutableStateOf<String?>(null) }
 
+            if (isLoading) {
+                CircularProgressIndicator(color = CoveGold)
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            if (errorMessage != null) {
+                Text(
+                    text = errorMessage!!,
+                    color = Color.Red,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+
+            Button(
+                enabled = !isLoading,
+                onClick = {
+                    if (phoneNumber.isBlank() || address.isBlank() || nationality.isBlank() || gender.isBlank()) {
+                        errorMessage = "Please fill in all fields"
+                        return@Button
+                    }
+                    
+                    isLoading = true
+                    errorMessage = null
+                    
                     viewModel.register(
                         email = email,
                         password = password,
@@ -131,16 +158,24 @@ fun SignUpProfileScreen(
                         nationality = nationality,
                         gender = gender
                     ) { success, error ->
-
+                        isLoading = false
                         if (success) {
                             onFinish()
+                        } else {
+                            errorMessage = error ?: "Registration failed. Please try again."
                         }
                     }
-
-                }
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF171310),
+                    contentColor = Color.White
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
             ) {
                 Text(
-                    text = "Next",
+                    text = if (isLoading) "Registering..." else "Finish",
                     fontSize = 14.sp
                 )
             }

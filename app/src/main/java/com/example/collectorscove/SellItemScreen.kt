@@ -1,6 +1,7 @@
 package com.example.collectorscove
 
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -56,6 +57,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.example.collectorscove.ui.auth.AuthViewModel
+import com.example.collectorscove.ui.item.ItemViewModel
 import com.example.collectorscove.ui.theme.CoveBackground
 import com.example.collectorscove.ui.theme.CoveBorder
 import com.example.collectorscove.ui.theme.CoveGold
@@ -67,10 +70,13 @@ private const val MAX_PHOTOS = 5
 
 @Composable
 fun SellItemScreen(
+    authViewModel: AuthViewModel,
+    itemViewModel: ItemViewModel,
     onMenuClick: () -> Unit,
     onNotificationsClick: () -> Unit,
     onListingPosted: () -> Unit = {}
 ) {
+    val currentUser by authViewModel.currentUser
     var itemName by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var price by remember { mutableStateOf("") }
@@ -82,6 +88,8 @@ fun SellItemScreen(
     }
     var pickingSlotIndex by remember { mutableIntStateOf(-1) }
     var showPostedMessage by remember { mutableStateOf(false) }
+    var isPosting by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     val pickImageLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
@@ -111,7 +119,8 @@ fun SellItemScreen(
         itemName.isNotBlank() &&
         selectedCategory.isNotBlank() &&
         price.isNotBlank() &&
-        selectedCondition.isNotBlank()
+        selectedCondition.isNotBlank() &&
+        !isPosting
 
     LazyColumn(
         modifier = Modifier
@@ -237,8 +246,26 @@ fun SellItemScreen(
         item {
             Button(
                 onClick = {
-                    showPostedMessage = true
-                    onListingPosted()
+                    currentUser?.let { user ->
+                        isPosting = true
+                        itemViewModel.postItem(
+                            context = context,
+                            sellerId = user.uid,
+                            name = itemName,
+                            price = price.toDoubleOrNull() ?: 0.0,
+                            category = selectedCategory,
+                            description = description,
+                            imageUri = coverUri
+                        ) { success, error ->
+                            isPosting = false
+                            if (success) {
+                                showPostedMessage = true
+                                Toast.makeText(context, "Listing posted successfully!", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(context, "Error: ${error ?: "Unknown error"}", Toast.LENGTH_LONG).show()
+                            }
+                        }
+                    }
                 },
                 enabled = isFormValid,
                 modifier = Modifier
@@ -252,11 +279,26 @@ fun SellItemScreen(
                     disabledContentColor = Color.Gray
                 )
             ) {
-                Text(
-                    text = if (showPostedMessage) "Listing Posted!" else "Post Listing",
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                if (isPosting) {
+                    androidx.compose.material3.CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = Color.White,
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Text(
+                        text = if (showPostedMessage) "Listing Posted!" else "Post Listing",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+            if (showPostedMessage) {
+                androidx.compose.runtime.LaunchedEffect(Unit) {
+                    kotlinx.coroutines.delay(2000)
+                    onListingPosted()
+                }
             }
             TextButton(
                 onClick = { },

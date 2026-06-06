@@ -16,6 +16,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.collectorscove.ui.auth.AuthViewModel
+import com.example.collectorscove.ui.item.ItemViewModel
+import com.example.collectorscove.ui.order.OrderViewModel
 import com.example.collectorscove.ui.theme.CoveBackground
 import kotlinx.coroutines.launch
 
@@ -29,6 +33,7 @@ sealed class Screen(val route: String) {
     object Account : Screen("account")
     object SellItem : Screen("sell_item")
     object MyCollection : Screen("my_collection")
+    object CommunityFeed : Screen("community_feed")
     object SignUpCredentials : Screen("signup_credentials")
     object SignUpName : Screen("signup_name")
     object SignUpProfile : Screen("signup_profile")
@@ -39,6 +44,19 @@ fun AppNavigation() {
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    val authViewModel: AuthViewModel = viewModel()
+    val itemViewModel: ItemViewModel = viewModel()
+    val orderViewModel: OrderViewModel = viewModel()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    val authRoutes = listOf(
+        Screen.Login.route,
+        Screen.SignUpCredentials.route,
+        Screen.SignUpName.route,
+        Screen.SignUpProfile.route
+    )
+    val isAuthRoute = currentRoute in authRoutes
 
     // Shared signup state
     var signupEmail by remember { mutableStateOf("") }
@@ -54,6 +72,8 @@ fun AppNavigation() {
 
     AppMenuDrawer(
         drawerState = drawerState,
+        viewModel = authViewModel,
+        enabled = !isAuthRoute,
         onMenuItemClick = { item ->
             scope.launch { drawerState.close() }
             when (item) {
@@ -70,6 +90,7 @@ fun AppNavigation() {
             }
         },
         onLogoutClick = {
+            authViewModel.logout()
             navController.navigate(Screen.Login.route) {
                 popUpTo(0) { inclusive = true }
             }
@@ -78,9 +99,7 @@ fun AppNavigation() {
         Scaffold(
             containerColor = CoveBackground,
             bottomBar = {
-                val navBackStackEntry by navController.currentBackStackEntryAsState()
-                val currentRoute = navBackStackEntry?.destination?.route
-                if (currentRoute != Screen.Login.route) {
+                if (!isAuthRoute) {
                     BottomNavBar(navController)
                 }
             }
@@ -88,10 +107,11 @@ fun AppNavigation() {
             Box(modifier = Modifier.padding(padding)) {
                 NavHost(
                     navController = navController,
-                    startDestination = Screen.Home.route
+                    startDestination = Screen.Login.route
                 ) {
                     composable(Screen.Login.route) {
                         LoginScreen(
+                            viewModel = authViewModel,
                             onSignIn = {
                                 navController.navigate(Screen.Home.route) {
                                     popUpTo(Screen.Login.route) { inclusive = true }
@@ -125,6 +145,7 @@ fun AppNavigation() {
 
                     composable(Screen.SignUpProfile.route) {
                         SignUpProfileScreen(
+                            viewModel = authViewModel,
                             email = signupEmail,
                             password = signupPassword,
                             firstName = signupFirstName,
@@ -139,6 +160,9 @@ fun AppNavigation() {
 
                     composable(Screen.Home.route) {
                         HomeScreen(
+                            authViewModel = authViewModel,
+                            itemViewModel = itemViewModel,
+                            orderViewModel = orderViewModel,
                             onMenuClick = openMenu,
                             onNotificationsClick = openNotifications
                         )
@@ -146,13 +170,22 @@ fun AppNavigation() {
 
                     composable(Screen.Explore.route) {
                         ExploreScreen(
+                            itemViewModel = itemViewModel,
+                            orderViewModel = orderViewModel,
+                            authViewModel = authViewModel,
                             onMenuClick = openMenu,
                             onNotificationsClick = openNotifications
                         )
                     }
 
+                    composable(Screen.CommunityFeed.route) {
+                        CommunityFeedScreen()
+                    }
+
                     composable(Screen.Orders.route) {
                         OrderScreen(
+                            authViewModel = authViewModel,
+                            orderViewModel = orderViewModel,
                             onMenuClick = openMenu,
                             onNotificationsClick = openNotifications
                         )
@@ -174,6 +207,7 @@ fun AppNavigation() {
 
                     composable(Screen.Account.route) {
                         AccountSettingsApp(
+                            viewModel = authViewModel,
                             onMenuClick = openMenu,
                             onNotificationsClick = openNotifications,
                             onLogout = {
@@ -186,13 +220,22 @@ fun AppNavigation() {
 
                     composable(Screen.SellItem.route) {
                         SellItemScreen(
+                            authViewModel = authViewModel,
+                            itemViewModel = itemViewModel,
                             onMenuClick = openMenu,
-                            onNotificationsClick = openNotifications
+                            onNotificationsClick = openNotifications,
+                            onListingPosted = {
+                                navController.navigate(Screen.Home.route) {
+                                    popUpTo(Screen.Home.route) { inclusive = true }
+                                }
+                            }
                         )
                     }
 
                     composable(Screen.MyCollection.route) {
                         MyCollectionScreen(
+                            authViewModel = authViewModel,
+                            itemViewModel = itemViewModel,
                             onMenuClick = openMenu,
                             onNotificationsClick = openNotifications
                         )

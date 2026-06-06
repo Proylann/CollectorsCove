@@ -52,6 +52,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.collectorscove.ui.auth.AuthViewModel
 import com.example.collectorscove.ui.theme.CoveBackground
 import com.example.collectorscove.ui.theme.CoveBorder
 import com.example.collectorscove.ui.theme.CoveGold
@@ -69,6 +70,7 @@ private enum class AccountPage {
 
 @Composable
 fun AccountSettingsApp(
+    viewModel: AuthViewModel,
     onMenuClick: () -> Unit = {},
     onNotificationsClick: () -> Unit = {},
     onLogout: () -> Unit = {}
@@ -78,9 +80,13 @@ fun AccountSettingsApp(
     when (page) {
         AccountPage.Settings -> {
             AccountSettingsScreen(
+                viewModel = viewModel,
                 onMenuClick = onMenuClick,
                 onNotificationsClick = onNotificationsClick,
-                onLogout = onLogout,
+                onLogout = {
+                    viewModel.logout()
+                    onLogout()
+                },
                 onChangePassword = { page = AccountPage.ChangePassword },
                 onBankCards = { page = AccountPage.BankCards },
                 onPrivacySettings = { page = AccountPage.PrivacySettings },
@@ -108,6 +114,7 @@ fun AccountSettingsApp(
 
 @Composable
 private fun AccountSettingsScreen(
+    viewModel: AuthViewModel,
     onMenuClick: () -> Unit,
     onNotificationsClick: () -> Unit,
     onLogout: () -> Unit,
@@ -116,6 +123,8 @@ private fun AccountSettingsScreen(
     onPrivacySettings: () -> Unit,
     onPaymentHistory: () -> Unit
 ) {
+    val user by viewModel.currentUser
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -165,7 +174,12 @@ private fun AccountSettingsScreen(
                 Spacer(Modifier.width(12.dp))
 
                 Column {
-                    Text("John Lennon", fontWeight = FontWeight.SemiBold, fontSize = 16.sp, color = Color.Black)
+                    Text(
+                        text = if (user != null) "${user!!.firstName} ${user!!.lastName}" else "Loading...",
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 16.sp,
+                        color = Color.Black
+                    )
                     Text("View Profile", fontSize = 12.sp, color = CoveGold, fontWeight = FontWeight.Medium)
                 }
             }
@@ -175,10 +189,10 @@ private fun AccountSettingsScreen(
         SectionLabel("Basic Information")
         Spacer(Modifier.height(4.dp))
 
-        InfoRow("Name", "John Lennon")
-        InfoRow("Gender", "Male")
-        InfoRow("Location", "Pasig City")
-        InfoRow("Email", "john@gmail.com")
+        InfoRow("Name", if (user != null) "${user!!.firstName} ${user!!.lastName}" else "N/A")
+        InfoRow("Gender", user?.gender ?: "N/A")
+        InfoRow("Location", user?.address ?: "N/A")
+        InfoRow("Email", user?.email ?: "N/A")
 
         Spacer(Modifier.height(20.dp))
         SectionLabel("Settings")

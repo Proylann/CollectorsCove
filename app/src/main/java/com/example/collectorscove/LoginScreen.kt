@@ -2,6 +2,8 @@ package com.example.collectorscove
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -23,14 +25,15 @@ import com.example.collectorscove.ui.auth.AuthViewModel
 
 @Composable
 fun LoginScreen(
+    viewModel: AuthViewModel,
     onSignIn: () -> Unit,
     onGoToSignup: () -> Unit
 ) {
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-
-    val viewModel = remember { AuthViewModel() }
+    var isLoading by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
 
     Box(
         modifier = Modifier
@@ -40,7 +43,8 @@ fun LoginScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 42.dp),
+                .padding(horizontal = 42.dp)
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(105.dp))
@@ -65,6 +69,15 @@ fun LoginScreen(
             )
 
             Spacer(modifier = Modifier.height(34.dp))
+
+            if (errorMessage != null) {
+                Text(
+                    text = errorMessage!!,
+                    color = Color.Red,
+                    fontSize = 13.sp,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
 
             LoginInput(
                 value = email,
@@ -95,11 +108,21 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
+                enabled = !isLoading,
                 onClick = {
-                    viewModel.login(email, password) { success, _ ->
-                        if (success) {
-                            onSignIn()
+                    if (email.isNotBlank() && password.isNotBlank()) {
+                        isLoading = true
+                        errorMessage = null
+                        viewModel.login(email, password) { success, error ->
+                            isLoading = false
+                            if (success) {
+                                onSignIn()
+                            } else {
+                                errorMessage = error ?: "Login failed"
+                            }
                         }
+                    } else {
+                        errorMessage = "Please enter email and password"
                     }
                 },
                 modifier = Modifier
@@ -110,13 +133,21 @@ fun LoginScreen(
                     contentColor = CoveSurface
                 )
             ) {
-                Text("Sign in", fontSize = 14.sp)
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        color = CoveSurface,
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Text("Sign in", fontSize = 14.sp)
+                }
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(24.dp))
 
             Row(
-                modifier = Modifier.padding(bottom = 180.dp),
+                modifier = Modifier.padding(bottom = 32.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(

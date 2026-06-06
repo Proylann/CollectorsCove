@@ -1,24 +1,19 @@
 package com.example.collectorscove
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Explore
+import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -26,34 +21,84 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.collectorscove.data.model.CollectibleItem
+import com.example.collectorscove.ui.auth.AuthViewModel
+import com.example.collectorscove.ui.item.ItemViewModel
+import com.example.collectorscove.ui.order.OrderViewModel
 import com.example.collectorscove.ui.theme.CoveBackground
 import com.example.collectorscove.ui.theme.CoveGold
 import com.example.collectorscove.ui.theme.CoveSurface
 
 @Composable
 fun HomeScreen(
+    authViewModel: AuthViewModel,
+    itemViewModel: ItemViewModel,
+    orderViewModel: OrderViewModel,
     onMenuClick: () -> Unit,
     onNotificationsClick: () -> Unit
 ) {
-    LazyColumn(
+    val items by itemViewModel.items
+    val currentUser by authViewModel.currentUser
+    var selectedItem by remember { mutableStateOf<CollectibleItem?>(null) }
+
+    val context = androidx.compose.ui.platform.LocalContext.current
+
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .background(CoveBackground)
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .padding(horizontal = 16.dp)
     ) {
-        item { Spacer(modifier = Modifier.height(24.dp)) }
-        item {
-            AppTopBar(
-                onMenuClick = onMenuClick,
-                onNotificationsClick = onNotificationsClick
-            )
+        Spacer(modifier = Modifier.height(24.dp))
+        AppTopBar(
+            onMenuClick = onMenuClick,
+            onNotificationsClick = onNotificationsClick
+        )
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        SectionHeader(title = "New Arrivals", actionText = "See All")
+        
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            modifier = Modifier.weight(1f),
+            contentPadding = PaddingValues(bottom = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            items(items) { item ->
+                ItemCard(
+                    item = item,
+                    onClick = { selectedItem = item }
+                )
+            }
         }
-        item { SectionHeader(title = "Hot Picks - Shoes", actionText = "See All") }
-        item { ProductGrid(items = shoeItems) }
-        item { SectionHeader(title = "Hot Picks - Cards", actionText = "See All") }
-        item { ProductGrid(items = cardItems) }
-        item { Spacer(modifier = Modifier.height(24.dp)) }
+    }
+
+    if (selectedItem != null) {
+        ItemDetailDialog(
+            item = selectedItem!!,
+            currentUserUid = currentUser?.uid,
+            onDismiss = { selectedItem = null },
+            onOrder = {
+                currentUser?.let { user ->
+                    orderViewModel.placeOrder(
+                        buyerId = user.uid,
+                        itemId = selectedItem!!.id,
+                        itemName = selectedItem!!.name,
+                        itemPrice = selectedItem!!.price,
+                        itemViewModel = itemViewModel
+                    ) { success, error ->
+                        if (success) {
+                            android.widget.Toast.makeText(context, "Order placed successfully!", android.widget.Toast.LENGTH_SHORT).show()
+                            selectedItem = null
+                        } else {
+                            android.widget.Toast.makeText(context, "Error: $error", android.widget.Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            }
+        )
     }
 }
 
@@ -62,6 +107,7 @@ fun BottomNavBar(navController: NavHostController) {
     val items = listOf(
         NavigationItem(Screen.Home, Icons.Default.Home, "Home"),
         NavigationItem(Screen.Explore, Icons.Default.Explore, "Explore"),
+        NavigationItem(Screen.CommunityFeed, Icons.Default.Groups, "Feed"),
         NavigationItem(Screen.Orders, Icons.Default.ShoppingCart, "Orders"),
         NavigationItem(Screen.Chat, Icons.Default.Chat, "Chat"),
         NavigationItem(Screen.Account, Icons.Default.AccountCircle, "Account")
@@ -112,46 +158,4 @@ private data class NavigationItem(
     val screen: Screen,
     val icon: ImageVector,
     val label: String
-)
-
-private val shoeItems = listOf(
-    CollectibleItem(
-        imageLabel = "Sneaker",
-        name = "Nike SB Dunk Low Hein...",
-        price = "P335,800.00",
-        imageColor = Color(0xFFE8F0ED)
-    ),
-    CollectibleItem(
-        imageLabel = "Sneaker",
-        name = "7-Eleven x Nike SB Dunk...",
-        price = "P310,169.34",
-        imageColor = Color(0xFFE8EEF0)
-    ),
-    CollectibleItem(
-        imageLabel = "Sneaker",
-        name = "Nike Dunk High Coraline",
-        price = "P333,900.65",
-        imageColor = Color(0xFFF0EDE8)
-    )
-)
-
-private val cardItems = listOf(
-    CollectibleItem(
-        imageLabel = "Card",
-        name = "Charizard-Holo 2016...",
-        price = "P143,671.00",
-        imageColor = Color(0xFFFFF2E0)
-    ),
-    CollectibleItem(
-        imageLabel = "Card",
-        name = "Pokemon Fossil Rare...",
-        price = "P10,891.18",
-        imageColor = Color(0xFFEDE7F6)
-    ),
-    CollectibleItem(
-        imageLabel = "Card",
-        name = "Solgaleo-GX - 155/149...",
-        price = "P3,954.86",
-        imageColor = Color(0xFFE7E0D4)
-    )
 )

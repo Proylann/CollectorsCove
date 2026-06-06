@@ -3,32 +3,22 @@ package com.example.collectorscove
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.collectorscove.data.model.CollectibleItem
+import com.example.collectorscove.ui.auth.AuthViewModel
+import com.example.collectorscove.ui.item.ItemViewModel
+import com.example.collectorscove.ui.order.OrderViewModel
 import com.example.collectorscove.ui.theme.CoveBackground
 import com.example.collectorscove.ui.theme.CoveBorder
 import com.example.collectorscove.ui.theme.CoveGold
@@ -37,43 +27,98 @@ import com.example.collectorscove.ui.theme.CoveSurface
 
 @Composable
 fun ExploreScreen(
+    authViewModel: AuthViewModel,
+    itemViewModel: ItemViewModel,
+    orderViewModel: OrderViewModel,
     onMenuClick: () -> Unit,
     onNotificationsClick: () -> Unit
 ) {
     var query by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf("All") }
+    
+    val items by itemViewModel.items
+    val currentUser by authViewModel.currentUser
+    var selectedItem by remember { mutableStateOf<CollectibleItem?>(null) }
 
-    LazyColumn(
+    val filteredItems = items.filter { 
+        (selectedCategory == "All" || it.category == selectedCategory) &&
+        (query.isBlank() || it.name.contains(query, ignoreCase = true))
+    }
+
+    val context = androidx.compose.ui.platform.LocalContext.current
+
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .background(CoveBackground)
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .padding(horizontal = 16.dp)
     ) {
-        item { Spacer(modifier = Modifier.height(24.dp)) }
-        item {
-            AppTopBar(
-                onMenuClick = onMenuClick,
-                onNotificationsClick = onNotificationsClick
-            )
+        Spacer(modifier = Modifier.height(24.dp))
+        AppTopBar(
+            onMenuClick = onMenuClick,
+            onNotificationsClick = onNotificationsClick
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        SearchBar(
+            query = query,
+            onQueryChange = { query = it }
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        CategoryChips(
+            selectedCategory = selectedCategory,
+            onCategorySelected = { selectedCategory = it }
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        SectionHeader(title = if (query.isBlank()) "Popular Results" else "Search Results")
+        
+        LazyColumn(
+            modifier = Modifier.weight(1f),
+            contentPadding = PaddingValues(bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            items(filteredItems.chunked(2)) { rowItems ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    for (item in rowItems) {
+                        Box(modifier = Modifier.weight(1f)) {
+                            ItemCard(item = item, onClick = { selectedItem = item })
+                        }
+                    }
+                    if (rowItems.size == 1) {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+                }
+            }
         }
-        item {
-            SearchBar(
-                query = query,
-                onQueryChange = { query = it }
-            )
-        }
-        item {
-            CategoryChips(
-                selectedCategory = selectedCategory,
-                onCategorySelected = { selectedCategory = it }
-            )
-        }
-        item { SectionHeader(title = "Recent Searches") }
-        item { RecentSearches() }
-        item { SectionHeader(title = "Popular Results") }
-        item { ProductGrid(items = popularItems) }
-        item { Spacer(modifier = Modifier.height(24.dp)) }
+    }
+
+    if (selectedItem != null) {
+        ItemDetailDialog(
+            item = selectedItem!!,
+            currentUserUid = currentUser?.uid,
+            onDismiss = { selectedItem = null },
+            onOrder = {
+                currentUser?.let { user ->
+                    orderViewModel.placeOrder(
+                        buyerId = user.uid,
+                        itemId = selectedItem!!.id,
+                        itemName = selectedItem!!.name,
+                        itemPrice = selectedItem!!.price,
+                        itemViewModel = itemViewModel
+                    ) { success, error ->
+                        if (success) {
+                            android.widget.Toast.makeText(context, "Order placed successfully!", android.widget.Toast.LENGTH_SHORT).show()
+                            selectedItem = null
+                        } else {
+                            android.widget.Toast.makeText(context, "Error: $error", android.widget.Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            }
+        )
     }
 }
 
@@ -112,18 +157,6 @@ private fun SearchBar(
                 cursorColor = Color.Black
             )
         )
-
-        Spacer(modifier = Modifier.width(10.dp))
-
-        Box(
-            modifier = Modifier
-                .size(50.dp)
-                .border(1.dp, CoveBorder, RoundedCornerShape(8.dp))
-                .background(CoveSurface, RoundedCornerShape(8.dp)),
-            contentAlignment = Alignment.Center
-        ) {
-            Text("Filter", fontSize = 11.sp, color = Color.Black)
-        }
     }
 }
 
@@ -134,11 +167,11 @@ private fun CategoryChips(
 ) {
     val categories = listOf("All", "Shoes", "Cards", "Toys", "Antiques")
 
-    Row(
+    LazyRow(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        categories.forEach { category ->
+        items(categories) { category ->
             val selected = category == selectedCategory
 
             Box(
@@ -166,61 +199,3 @@ private fun CategoryChips(
         }
     }
 }
-
-@Composable
-private fun RecentSearches() {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        listOf("Nike Air Max", "Charizard", "Vintage radio").forEach { search ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(36.dp)
-                    .background(CoveLightGray, RoundedCornerShape(6.dp))
-                    .padding(horizontal = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = search,
-                    modifier = Modifier.weight(1f),
-                    fontSize = 13.sp,
-                    color = Color.Black
-                )
-
-                Text(
-                    text = "x",
-                    fontSize = 13.sp,
-                    color = Color.Gray
-                )
-            }
-        }
-    }
-}
-
-private val popularItems = listOf(
-    CollectibleItem(
-        imageLabel = "Sneaker",
-        name = "MSCHF x INRI x Nike Air Max 97",
-        price = "P335,800.00",
-        imageColor = Color(0xFFE8F0ED)
-    ),
-    CollectibleItem(
-        imageLabel = "Card",
-        name = "Charizard-Holo 2016 Pokemon",
-        price = "P143,671.00",
-        imageColor = Color(0xFFFFF2E0)
-    ),
-    CollectibleItem(
-        imageLabel = "Toy",
-        name = "Vintage Tin Robot Collectible",
-        price = "P8,450.00",
-        imageColor = Color(0xFFEDE7F6)
-    ),
-    CollectibleItem(
-        imageLabel = "Radio",
-        name = "Classic Wooden Radio",
-        price = "P5,731.63",
-        imageColor = Color(0xFFE7E0D4)
-    )
-)
